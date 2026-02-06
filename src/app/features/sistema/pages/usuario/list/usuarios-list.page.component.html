@@ -1,0 +1,19 @@
+<div class="page-container">
+    <app-data-table title="Usuarios" subtitle="Gestión de usuarios del sistema" [columns]="columns"
+        [rows]="store.pagedItems()" [total]="store.totalItems()" [loading]="store.loading()"
+        [pageIndex]="store.pageIndex()" [pageSize]="store.pageSize()" [showCreate]="true" createText="Nuevo Usuario"
+        (create)="onCreate()" (edit)="onEdit($event)" (remove)="confirmDelete(deleteConfirmDialog, $event)"
+        (pageChange)="store.onPageChange($event)" (filterChange)="store.setFilter($event.key, $event.value)"
+        (clearFilters)="store.clearFilters()"></app-data-table>
+</div>
+
+<ng-template #deleteConfirmDialog let-data>
+    <h2 mat-dialog-title>Confirmar eliminación</h2>
+    <mat-dialog-content>
+        ¿Está seguro que desea eliminar al usuario <strong>{{ data.usuario }}</strong>?
+    </mat-dialog-content>
+    <mat-dialog-actions align="end">
+        <button mat-button mat-dialog-close>Cancelar</button>
+        <button mat-flat-button color="warn" [mat-dialog-close]="true">Eliminar</button>
+    </mat-dialog-actions>
+</ng-template>

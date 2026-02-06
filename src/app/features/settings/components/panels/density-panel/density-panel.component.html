@@ -1,0 +1,43 @@
+<mat-card class="p-0 overflow-hidden border border-gray-200 shadow-sm">
+    <div class="p-4 border-b bg-gray-50 font-medium text-gray-700">Nivel de Densidad</div>
+    <div class="p-6">
+        <mat-radio-group [ngModel]="themeService.settings().density" (ngModelChange)="updateDensity($event)"
+            class="flex flex-col gap-3">
+
+            <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                [class.border-primary]="themeService.settings().density === 'compact'"
+                [class.bg-blue-50]="themeService.settings().density === 'compact'">
+                <mat-radio-button value="compact" class="mr-2"></mat-radio-button>
+                <div class="flex-grow">
+                    <div class="font-medium text-sm">Compacto</div>
+                    <div class="text-xs text-gray-500">Alta densidad de datos. Ideal para escritorio y
+                        power users.</div>
+                </div>
+                <mat-icon class="text-gray-400">format_align_justify</mat-icon>
+            </div>
+
+            <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                [class.border-primary]="themeService.settings().density === 'normal'"
+                [class.bg-blue-50]="themeService.settings().density === 'normal'">
+                <mat-radio-button value="normal" class="mr-2"></mat-radio-button>
+                <div class="flex-grow">
+                    <div class="font-medium text-sm">Normal</div>
+                    <div class="text-xs text-gray-500">Balance estándar entre espacio y contenido.</div>
+                </div>
+                <mat-icon class="text-gray-400">format_list_bulleted</mat-icon>
+            </div>
+
+            <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                [class.border-primary]="themeService.settings().density === 'comfortable'"
+                [class.bg-blue-50]="themeService.settings().density === 'comfortable'">
+                <mat-radio-button value="comfortable" class="mr-2"></mat-radio-button>
+                <div class="flex-grow">
+                    <div class="font-medium text-sm">Cómodo</div>
+                    <div class="text-xs text-gray-500">Espaciado amplio. Ideal para táctil o lectura.
+                    </div>
+                </div>
+                <mat-icon class="text-gray-400">dns</mat-icon>
+            </div>
+        </mat-radio-group>
+    </div>
+</mat-card>

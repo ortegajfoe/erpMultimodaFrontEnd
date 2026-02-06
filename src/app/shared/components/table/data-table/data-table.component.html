@@ -1,0 +1,209 @@
+<div class="flex flex-col h-full bg-gray-50">
+
+    <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10"
+        *ngIf="title">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">{{title}}</h1>
+        </div>
+        <button mat-flat-button color="primary" *ngIf="showCreate" (click)="create.emit()">
+            <mat-icon class="mr-2">add</mat-icon>
+            {{createText}}
+        </button>
+    </div>
+
+
+    <div class="flex-grow p-4 md:p-6 overflow-hidden flex flex-col">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full overflow-hidden relative">
+
+
+            @if (error) {
+            <div class="absolute inset-0 z-20 bg-white flex items-center justify-center">
+                <app-error-state [message]="error || 'Error desconocido'" (retry)="retry.emit()"></app-error-state>
+            </div>
+            }
+
+
+            @else if (loading) {
+            <div class="p-6 space-y-4 animate-pulse">
+
+                <div class="flex space-x-4 border-b pb-4 border-gray-100">
+                    <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+                    <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+                    <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+                    <div class="h-6 bg-gray-200 rounded w-1/4"></div>
+                </div>
+
+
+                @for (item of skeletonRows; track $index) {
+                <div class="flex space-x-4 py-3 border-b border-gray-50">
+                    <div class="h-8 bg-gray-100 rounded w-1/4"></div>
+                    <div class="h-8 bg-gray-100 rounded w-full"></div>
+                    <div class="h-8 bg-gray-100 rounded w-1/3"></div>
+                    <div class="h-8 bg-gray-100 rounded w-1/5"></div>
+                </div>
+                }
+            </div>
+            }
+
+
+            @else {
+
+            @if (isMobile) {
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
+                <span class="text-sm font-medium text-gray-500">
+                    {{total}} registros
+                </span>
+                <button mat-stroked-button (click)="showMobileFilters = !showMobileFilters"
+                    [color]="showMobileFilters ? 'primary' : ''">
+                    <mat-icon class="mr-1">{{showMobileFilters ? 'filter_list_off' : 'filter_list'}}</mat-icon>
+                    Filtros
+                </button>
+            </div>
+
+
+            @if (showMobileFilters) {
+            <div class="p-4 bg-gray-50 border-b border-gray-200 animate-in slide-in-from-top-2"
+                [formGroup]="filterForm">
+                <div class="grid grid-cols-1 gap-3">
+                    @for (col of columns; track col.key) {
+                    @if (col.filter && col.filter !== 'none') {
+                    <mat-form-field appearance="outline" class="w-full dense-form-field bg-white">
+                        <mat-label>{{col.label}}</mat-label>
+                        <input matInput [formControlName]="getControlName(col)">
+                    </mat-form-field>
+                    }
+                    }
+                </div>
+            </div>
+            }
+            }
+
+
+            @if (!isMobile) {
+            <div class="flex-grow overflow-hidden relative flex flex-col table-container-wrapper">
+
+                <div class="table-scroll flex-grow" [formGroup]="filterForm">
+                    <table mat-table [dataSource]="rows" matSort (matSortChange)="onSort($event)"
+                        [matSortActive]="sortActive" [matSortDirection]="sortDirection" class="w-full">
+
+                        @for (col of columns; track col.key) {
+                        <ng-container [matColumnDef]="getControlName(col)">
+                            <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!col.sortable">
+                                {{col.label}} </th>
+                            <td mat-cell *matCellDef="let row">
+                                @if(col.chip) {
+                                <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                    {{getValue(row, col)}}
+                                </span>
+                                } @else {
+                                {{getValue(row, col)}}
+                                }
+                            </td>
+                        </ng-container>
+
+
+                        <ng-container [matColumnDef]="getControlName(col) + '-filter'">
+                            <th mat-header-cell *matHeaderCellDef>
+                                @if (col.filter && col.filter !== 'none') {
+                                <mat-form-field appearance="outline" class="w-full dense-form-field filter-field">
+                                    <input matInput [formControlName]="getControlName(col)" placeholder="Filtrar">
+                                </mat-form-field>
+                                }
+                            </th>
+                        </ng-container>
+                        }
+
+
+                        <ng-container matColumnDef="acciones">
+                            <th mat-header-cell *matHeaderCellDef> Acciones </th>
+                            <td mat-cell *matCellDef="let row">
+                                <div class="flex justify-end gap-2">
+                                    <button mat-icon-button color="primary" (click)="edit.emit(row)"
+                                        matTooltip="Editar">
+                                        <mat-icon>edit</mat-icon>
+                                    </button>
+                                    <button mat-icon-button color="warn" (click)="remove.emit(row)"
+                                        matTooltip="Eliminar">
+                                        <mat-icon>delete</mat-icon>
+                                    </button>
+                                </div>
+                            </td>
+                        </ng-container>
+                        <ng-container matColumnDef="acciones-filter">
+                            <th mat-header-cell *matHeaderCellDef></th>
+                        </ng-container>
+
+
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+
+
+                        <tr mat-header-row *matHeaderRowDef="filterColumns; sticky: true" class="filter-row"></tr>
+
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"
+                            class="hover:bg-gray-50 transition-colors"></tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell p-8 text-center text-gray-500" [attr.colspan]="displayedColumns.length">
+                                No se encontraron datos que coincidan con los filtros.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            }
+
+
+            @if (isMobile) {
+            <div class="flex-grow overflow-auto p-4 bg-gray-50 space-y-3 mobile-scroll-container">
+
+                @for (row of rows; track trackById($index, row)) {
+                <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col gap-2">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-semibold text-gray-900 text-lg">{{getMobilePrimaryValue(row)}}</h3>
+                        </div>
+                        <div class="flex -mt-2 -mr-2">
+                            <button mat-icon-button color="primary" (click)="edit.emit(row)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button mat-icon-button color="warn" (click)="remove.emit(row)">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-2 gap-y-1 mt-2 text-sm text-gray-600">
+                        @for(col of getMobileSecondaryColumns(); track col.key) {
+                        <div class="col-span-1" [class.col-span-2]="col.chip">
+                            <span class="text-xs text-gray-400 block uppercase">{{col.label}}</span>
+                            @if(col.chip) {
+                            <span
+                                class="inline-block px-2 py-0.5 mt-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                                {{getValue(row, col)}}
+                            </span>
+                            } @else {
+                            {{getValue(row, col)}}
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+                } @empty {
+                <div class="text-center py-8 text-gray-500 bg-white rounded-lg border border-dashed border-gray-300">
+                    No se encontraron datos que coincidan con los filtros.
+                </div>
+                }
+
+            </div>
+            }
+
+            <mat-paginator [length]="total" [pageIndex]="pageIndex" [pageSize]="pageSize"
+                [pageSizeOptions]="[10, 25, 100]" aria-label="Seleccionar página"
+                (page)="onPage($event)"></mat-paginator>
+
+            }
+
+        </div>
+    </div>
+</div>

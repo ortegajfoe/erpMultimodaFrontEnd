@@ -1,0 +1,29 @@
+<mat-card class="p-0 overflow-hidden border border-gray-200 shadow-sm">
+    <div class="p-4 border-b bg-gray-50 font-medium text-gray-700">Estilo de Botones</div>
+    <div class="p-6">
+        <h4 class="font-medium mb-4 text-gray-900">Forma (Shape)</h4>
+        <div class="flex flex-wrap gap-4">
+            <div (click)="updateButtonShape('square')"
+                class="cursor-pointer border-2 p-4 rounded-md min-w-[120px] text-center hover:bg-gray-50 transition-all"
+                [class.border-primary]="themeService.settings().buttonShape === 'square'"
+                [class.bg-blue-50]="themeService.settings().buttonShape === 'square'">
+                <div class="h-8 w-16 bg-gray-300 mx-auto mb-2"></div>
+                <span class="text-sm font-medium">Cuadrado</span>
+            </div>
+            <div (click)="updateButtonShape('rounded')"
+                class="cursor-pointer border-2 p-4 rounded-md min-w-[120px] text-center hover:bg-gray-50 transition-all"
+                [class.border-primary]="themeService.settings().buttonShape === 'rounded'"
+                [class.bg-blue-50]="themeService.settings().buttonShape === 'rounded'">
+                <div class="h-8 w-16 bg-gray-300 mx-auto mb-2 rounded"></div>
+                <span class="text-sm font-medium">Redondeado</span>
+            </div>
+            <div (click)="updateButtonShape('pill')"
+                class="cursor-pointer border-2 p-4 rounded-md min-w-[120px] text-center hover:bg-gray-50 transition-all"
+                [class.border-primary]="themeService.settings().buttonShape === 'pill'"
+                [class.bg-blue-50]="themeService.settings().buttonShape === 'pill'">
+                <div class="h-8 w-16 bg-gray-300 mx-auto mb-2 rounded-full"></div>
+                <span class="text-sm font-medium">Pill</span>
+            </div>
+        </div>
+    </div>
+</mat-card>

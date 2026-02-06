@@ -1,1 +1,140 @@
-/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@mixin density($scale) {
+  @include mat.all-component-densities($scale);
+}
+
+:root {
+  --primary-color: #0f172a;
+  --primary-muted: #0f172a14;
+  --secondary-color: #ffffff;
+  --font-family: 'Inter', sans-serif;
+  --base-font-size: 14px;
+  --border-radius: 12px;
+  --font-scale: 1;
+
+  --app-bg: #f9fafb;
+  --card-bg: #ffffff;
+  --card-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+
+  --brand-primary: var(--primary-color);
+  --erp-font-family: var(--font-family);
+}
+
+html {
+  height: 100%;
+  @include mat.theme((color: (primary: mat.$azure-palette, tertiary: mat.$blue-palette), typography: Roboto, density: 0));
+  font-size: calc(16px * var(--font-scale));
+}
+
+body {
+  color-scheme: light;
+  background-color: var(--app-bg);
+  color: var(--mat-sys-on-surface);
+
+  font-family: var(--font-family) !important;
+  font-size: var(--base-font-size);
+
+  margin: 0;
+  height: 100%;
+}
+
+.app-card {
+  background: var(--card-bg);
+  border-radius: var(--border-radius);
+  border: 1px solid #e5e7eb;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+}
+
+button,
+.mat-mdc-button-base {
+  border-radius: var(--border-radius) !important;
+}
+
+input,
+.mat-mdc-input-element {
+  font-family: var(--font-family) !important;
+}
+
+.density-compact {
+  @include density(-2);
+}
+
+.density-normal {
+  @include density(0);
+}
+
+.density-comfortable {
+  @include density(1);
+}
+
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-fab.mat-primary,
+.mat-mdc-mini-fab.mat-primary {
+  --mdc-filled-button-container-color: var(--brand-primary) !important;
+  --mdc-protected-button-container-color: var(--brand-primary) !important;
+  --mdc-fab-container-color: var(--brand-primary) !important;
+}
+
+.mat-mdc-button.mat-primary,
+.mat-mdc-outlined-button.mat-primary {
+  --mdc-text-button-label-text-color: var(--brand-primary) !important;
+  --mdc-outlined-button-label-text-color: var(--brand-primary) !important;
+  --mdc-outlined-button-outline-color: var(--brand-primary) !important;
+}
+
+.text-primary {
+  color: var(--brand-primary) !important;
+}
+
+.bg-primary {
+  background-color: var(--brand-primary) !important;
+}
+
+
+@import './assets/scss/components/tables';
+
+.cdk-overlay-container {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999 !important;
+  pointer-events: none;
+  background: transparent !important;
+}
+
+.cdk-global-overlay-wrapper,
+.cdk-overlay-pane {
+  pointer-events: auto;
+}
+
+
+
+.error-snackbar {
+  --mdc-snackbar-container-color: #ef4444;
+  --mdc-snackbar-supporting-text-color: #ffffff;
+  --mat-snack-bar-button-color: #ffffff;
+}
+
+
+.confirm-dialog-container .mdc-dialog__surface {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.6) !important;
+  backdrop-filter: blur(4px);
+}

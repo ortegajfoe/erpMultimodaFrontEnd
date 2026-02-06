@@ -1,0 +1,42 @@
+<div class="flex flex-col h-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4 bg-white">
+        <div class="relative flex-grow max-w-md">
+            <mat-icon class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">search</mat-icon>
+            <input type="text" placeholder="Buscar..." (keyup)="applyGlobalFilter($event)"
+                class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+        </div>
+        <div class="flex gap-2">
+            <button mat-stroked-button color="primary"
+                class="!rounded-lg !border-gray-200 text-gray-600"><mat-icon>filter_list</mat-icon> Filtros</button>
+            <button mat-flat-button color="primary" class="!rounded-lg" (click)="create.emit()"><mat-icon>add</mat-icon>
+                Nuevo</button>
+        </div>
+    </div>
+    <div class="flex-grow overflow-auto relative">
+        <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortChange.emit($event)" class="w-full">
+            @for (col of columns; track col.key) {
+            <ng-container [matColumnDef]="col.key.toString()">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [disabled]="!col.sortable">{{ col.label }}</th>
+                <td mat-cell *matCellDef="let row">
+                    @if(col.chip) { <span
+                        class="px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">{{
+                        getValue(row, col) }}</span> }
+                    @else { {{ getValue(row, col) }} }
+                </td>
+            </ng-container>
+            }
+            <ng-container matColumnDef="acciones" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef class="w-24"></th>
+                <td mat-cell *matCellDef="let row">
+                    <div class="flex justify-end gap-1"><button mat-icon-button color="primary"
+                            (click)="edit.emit(row)"><mat-icon>edit</mat-icon></button><button mat-icon-button
+                            color="warn" (click)="remove.emit(row)"><mat-icon>delete</mat-icon></button></div>
+                </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="hover:bg-gray-50 transition-colors">
+            </tr>
+        </table>
+    </div>
+    <mat-paginator [length]="total" [pageSize]="pageSize" [pageSizeOptions]="[5, 10, 25]"></mat-paginator>
+</div>

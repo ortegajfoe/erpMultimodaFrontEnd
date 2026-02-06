@@ -1,0 +1,175 @@
+<div class="hidden lg:block w-full h-full bg-gray-100 border-l border-gray-200 overflow-y-auto p-8">
+
+    <div class="w-full max-w-6xl mx-auto">
+        <div class="flex items-center gap-2 mb-4 text-gray-500 sticky top-0 bg-gray-100 z-10 py-2">
+            <mat-icon class="text-sm">visibility</mat-icon>
+            <span class="text-xs font-bold uppercase tracking-wider">Vista Previa en Vivo</span>
+        </div>
+
+        <mat-card class="w-full bg-white overflow-hidden shadow-xl border border-gray-200 rounded-xl transition-all">
+
+            <div class="p-4 bg-gray-50 border-b flex items-center justify-between">
+                <span class="font-bold text-xs text-gray-500 uppercase tracking-wide">
+                    @switch (activeSection()) {
+                    @case ('appearance') { Dashboard Demo }
+                    @case ('typography') { Muestra de Texto }
+                    @case ('buttons') { Botones Demo }
+                    @case ('inputs') { Formulario Demo }
+                    @case ('tables') { Tabla de Datos }
+                    @default { Vista General }
+                    }
+                </span>
+            </div>
+
+            <div class="p-8">
+
+                @switch (activeSection()) {
+
+                @case ('appearance') {
+                <div class="flex flex-col gap-6">
+                    <div
+                        class="h-32 rounded-xl bg-primary/10 border-2 border-dashed border-primary/30 flex flex-col items-center justify-center text-primary transition-colors duration-300">
+                        <mat-icon class="text-5xl mb-2">palette</mat-icon>
+                        <span class="text-sm font-bold">Color Principal Activo</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <button mat-flat-button color="primary" class="h-12">Acción Principal</button>
+                        <button mat-stroked-button color="primary" class="h-12">Acción Secundaria</button>
+                    </div>
+
+                    <div class="p-4 rounded bg-gray-50 border text-sm text-gray-600">
+                        Así se verán los elementos de alto énfasis con tu configuración actual.
+                    </div>
+                </div>
+                }
+
+                @case ('typography') {
+                <div class="flex flex-col gap-4 max-w-2xl mx-auto">
+                    <div class="space-y-1">
+                        <span class="text-xs text-gray-400 font-mono">H1 Header</span>
+                        <h1 class="text-3xl font-bold text-gray-900">Titulos de mis paginas</h1>
+                    </div>
+
+                    <div class="space-y-1">
+                        <span class="text-xs text-gray-400 font-mono">H2 Subheader</span>
+                        <h2 class="text-2xl font-semibold text-gray-800">Subtitulos de mis paginas</h2>
+                    </div>
+
+                    <div class="space-y-1">
+                        <span class="text-xs text-gray-400 font-mono">Body Text</span>
+                        <p class="text-base leading-relaxed text-gray-600">
+                            Texto de mis paginas,Así se verán los textos de mis paginas.
+                        </p>
+                    </div>
+
+                    <div class="mt-4 p-4 border-l-4 border-primary bg-primary/5">
+                        <p class="text-sm font-medium text-primary">
+                            Texto destacado o cita utilizando el color primario.
+                        </p>
+                    </div>
+                </div>
+                }
+
+                @case ('buttons') {
+                <div class="flex flex-col items-center gap-8 py-8">
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button mat-flat-button color="primary" class="scale-110">Flat Button</button>
+                        <button mat-raised-button color="primary">Raised Button</button>
+                    </div>
+                    <div class="flex flex-wrap justify-center gap-4">
+                        <button mat-stroked-button color="primary">Stroked</button>
+                        <button mat-button color="primary">Text Only</button>
+                    </div>
+                    <div class="flex gap-6 items-center">
+                        <button mat-fab color="primary"><mat-icon>add</mat-icon></button>
+                        <button mat-mini-fab color="warn"><mat-icon>delete</mat-icon></button>
+                        <button mat-icon-button color="primary"><mat-icon>settings</mat-icon></button>
+                    </div>
+                </div>
+                }
+
+                @case ('inputs') {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <mat-form-field class="w-full" [appearance]="themeService.settings().inputAppearance">
+                        <mat-label>Usuario</mat-label>
+                        <input matInput placeholder="nombre@empresa.com">
+                        <mat-icon matPrefix class="mr-2 text-gray-400">email</mat-icon>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-full" [appearance]="themeService.settings().inputAppearance">
+                        <mat-label>Rol de Usuario</mat-label>
+                        <mat-select value="admin">
+                            <mat-option value="admin">Administrador</mat-option>
+                            <mat-option value="user">Usuario Estándar</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+
+                    <mat-form-field class="w-full md:col-span-2" [appearance]="themeService.settings().inputAppearance">
+                        <mat-label>Bio / Descripción</mat-label>
+                        <textarea matInput rows="4" placeholder="Escribe algo sobre ti..."></textarea>
+                    </mat-form-field>
+                </div>
+                }
+
+                @case ('tables') {
+                <div class="w-full text-left mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-gray-400">Layout Actual: {{
+                        themeService.settings().tableLayout | uppercase }}</span>
+                </div>
+                <div class="h-96 w-full relative">
+                    @if (themeService.settings().tableLayout === 'toolbar') {
+                    <app-toolbar-table [data]="previewTableData" [columns]="previewColumns" [loading]="false"
+                        [total]="3" [pageSize]="10">
+                    </app-toolbar-table>
+                    } @else {
+                    <app-data-table [rows]="previewTableData" [columns]="previewColumns" [loading]="false" [total]="3"
+                        [pageSize]="10">
+                    </app-data-table>
+                    }
+                </div>
+                }
+
+                @case ('density') {
+                <div class="flex flex-col gap-6 max-w-md mx-auto">
+                    <div class="flex items-start gap-4 p-4 border rounded-lg bg-gray-50">
+                        <div class="w-12 h-12 rounded bg-gray-200 flex-shrink-0"></div>
+                        <div class="space-y-2 w-full">
+                            <div class="h-4 w-3/4 bg-gray-300 rounded"></div>
+                            <div class="h-3 w-full bg-gray-200 rounded"></div>
+                            <div class="h-3 w-1/2 bg-gray-200 rounded"></div>
+                        </div>
+                    </div>
+                    <mat-divider></mat-divider>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <mat-icon class="text-gray-400">folder</mat-icon>
+                                <span class="text-sm font-medium">Documentos</span>
+                            </div>
+                            <span class="text-xs text-gray-400">12 MB</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 hover:bg-gray-50 rounded cursor-pointer">
+                            <div class="flex items-center gap-3">
+                                <mat-icon class="text-gray-400">image</mat-icon>
+                                <span class="text-sm font-medium">Imágenes</span>
+                            </div>
+                            <span class="text-xs text-gray-400">245 MB</span>
+                        </div>
+                    </div>
+                </div>
+                }
+
+                @default {
+                <div class="text-center py-20">
+                    <mat-icon class="text-6xl text-gray-200 mb-4">preview</mat-icon>
+                    <p class="text-gray-400 font-medium">Selecciona una sección a la izquierda para ver la vista previa.
+                    </p>
+                </div>
+                }
+
+                }
+            </div>
+        </mat-card>
+    </div>
+</div>

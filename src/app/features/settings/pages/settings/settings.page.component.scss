@@ -1,0 +1,37 @@
+:host {
+    display: block;
+    height: 100%;
+}
+
+// Custom scrollbar for sidebar
+aside {
+    overflow-y: auto;
+
+    /* Thin scrollbar */
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #ccc;
+        border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+}
+
+// Active state for sidebar items
+.mat-list-item.bg-blue-50 {
+    background-color: #eff6ff !important;
+
+    .mat-icon {
+        color: var(--erp-primary) !important;
+    }
+
+    .mat-list-item-content {
+        color: var(--erp-primary) !important;
+        font-weight: 500;
+    }
+}

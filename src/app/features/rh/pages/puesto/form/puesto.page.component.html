@@ -1,0 +1,64 @@
+<div class="flex flex-col h-full bg-gray-50">
+
+    <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+        <div>
+            <h1 class="text-xl font-bold text-gray-800">{{ pageTitle }}</h1>
+            <p class="text-sm text-gray-500">Información del puesto</p>
+        </div>
+    </div>
+
+
+    <div class="flex-grow overflow-auto p-6 bg-gray-50">
+        <div class="max-w-3xl mx-auto">
+            <mat-card appearance="outlined" class="bg-white">
+                <mat-card-content class="pt-6">
+                    <form [formGroup]="form" class="flex flex-col gap-4">
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <mat-form-field appearance="outline" class="md:col-span-1">
+                                <mat-label>Nombre del Puesto</mat-label>
+                                <input matInput formControlName="puesto" placeholder="Ej. Gerente de Ventas">
+                                <mat-error>Requerido</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="md:col-span-1">
+                                <mat-label>Departamento</mat-label>
+                                <mat-select formControlName="idDepartamento">
+                                    @for (d of departamentos; track d.idDepartamento) {
+                                    <mat-option [value]="d.idDepartamento">
+                                        {{d.departamento}}
+                                    </mat-option>
+                                    } @empty {
+                                    <mat-option disabled>No hay departamentos</mat-option>
+                                    }
+                                </mat-select>
+                                <mat-error>Requerido</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="md:col-span-2">
+                                <mat-label>Notas</mat-label>
+                                <textarea matInput formControlName="notas" rows="4" placeholder="Opcional"></textarea>
+                            </mat-form-field>
+                        </div>
+
+                    </form>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+
+
+    <div class="bg-white border-t border-gray-200 px-6 py-3 flex justify-end gap-3 sticky bottom-0 z-20">
+        <button mat-button color="warn" (click)="cancel()">
+            Cancelar
+        </button>
+        <button mat-flat-button color="primary" [disabled]="form.invalid || loading" (click)="save()">
+            @if (loading) {
+            <mat-icon class="animate-spin mr-2">sync</mat-icon>
+            } @else {
+            <mat-icon class="mr-2">save</mat-icon>
+            }
+            Guardar
+        </button>
+    </div>
+</div>

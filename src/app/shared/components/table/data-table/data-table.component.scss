@@ -1,0 +1,237 @@
+// Modern Enterprise Design - Reactive Themes
+// Variables
+$table-header-bg: #0d47a1;
+$table-header-text: #ffffff;
+$table-row-even-bg: #f5f7fa;
+$table-row-hover-bg: #e1e7ef;
+$table-border-color: #e0e0e0;
+
+:host {
+    display: block;
+    height: 100%;
+    padding: 1rem;
+}
+
+// === BASE STYLES ===
+.table-container-wrapper {
+    height: 100%;
+    background: white;
+    border-radius: var(--border-radius, 12px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s ease;
+}
+
+.table-scroll {
+    overflow: auto;
+    width: 100%;
+    flex: 1;
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+// Estilos generales de celdas Header
+thead th,
+.mat-mdc-header-cell {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.8rem;
+    padding: 16px;
+    border: none;
+    // position: sticky; // Lo maneja Material
+    // top: 0;
+    z-index: 20;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+tbody tr,
+.mat-mdc-row {
+
+    td,
+    .mat-mdc-cell {
+        padding: 14px 16px;
+        vertical-align: middle;
+        border-bottom: 1px solid $table-border-color;
+        color: #333;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: padding 0.3s, font-size 0.3s;
+    }
+
+    &:hover {
+        background-color: $table-row-hover-bg;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+}
+
+// === TEMA 1: GLASS (Azul Corporativo) - MODIFICADO ===
+:host-context(body.theme-table-glass),
+:host-context(body:not(.theme-table-toolbar)) {
+
+    // 1. Títulos: Fondo Azul y Texto Blanco
+    thead tr:not(.filter-row) th,
+    thead tr:not(.filter-row) .mat-mdc-header-cell {
+        background-color: $table-header-bg !important;
+        color: $table-header-text !important;
+    }
+
+    // 2. Filtros: Fondo Blanco y Texto Oscuro (Limpios)
+    tr.filter-row th,
+    tr.filter-row .mat-mdc-header-cell {
+        background-color: #ffffff !important;
+        border-bottom: 1px solid $table-border-color;
+        padding-top: 8px !important; // Ajuste para que se vea compacto
+        padding-bottom: 8px !important;
+    }
+
+    // Estilo de Inputs en la fila blanca (tipo Toolbar/Clean)
+    .filter-field {
+        ::ng-deep .mat-mdc-text-field-wrapper {
+            background-color: #f8fafc !important; // Gris muy suave
+            border: 1px solid #e2e8f0;
+            color: #333;
+            border-radius: 4px;
+        }
+
+        ::ng-deep .mat-mdc-input-element {
+            color: #333 !important;
+
+            &::placeholder {
+                color: #94a3b8 !important;
+            }
+        }
+
+        // Efecto Focus
+        &:focus-within {
+            ::ng-deep .mat-mdc-text-field-wrapper {
+                background-color: #fff !important;
+                border-color: $table-header-bg; // Borde azul al enfocar
+                box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.1);
+            }
+        }
+    }
+}
+
+// === TEMA 2: TOOLBAR (Minimalista) ===
+:host-context(body.theme-table-toolbar) {
+    .table-container-wrapper {
+        border: 1px solid #e2e8f0;
+        box-shadow: none;
+        border-radius: 8px;
+    }
+
+    thead th,
+    .mat-mdc-header-cell {
+        background-color: #f8fafc !important;
+        color: #475569 !important;
+        font-weight: 700;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .filter-field {
+        ::ng-deep .mat-mdc-text-field-wrapper {
+            background-color: white !important;
+            border: 1px solid #cbd5e1;
+            color: #333;
+        }
+
+        ::ng-deep .mat-mdc-input-element {
+            color: #333 !important;
+
+            &::placeholder {
+                color: #94a3b8 !important;
+            }
+        }
+    }
+}
+
+// === ZEBRA STRIPING ===
+:host-context(body.theme-table-zebra) {
+    tbody tr:nth-of-type(even) {
+        background-color: #f8fafc;
+    }
+}
+
+// === DENSIDAD ===
+:host-context(body.theme-density-compact) {
+
+    thead th,
+    .mat-mdc-header-cell {
+        padding: 8px 12px;
+        font-size: 0.75rem;
+    }
+
+    tbody td,
+    .mat-mdc-cell {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    // Ajuste extra para filtros compactos
+    tr.filter-row th {
+        padding: 4px 12px !important;
+    }
+}
+
+:host-context(body.theme-density-relaxed) {
+
+    thead th,
+    .mat-mdc-header-cell {
+        padding: 20px 24px;
+        font-size: 0.9rem;
+    }
+
+    tbody td,
+    .mat-mdc-cell {
+        padding: 20px 24px;
+        font-size: 1rem;
+    }
+}
+
+// Standard Filter Field Styles (Base)
+.filter-field {
+    width: 100%;
+    display: block;
+
+    ::ng-deep .mat-mdc-form-field {
+        width: 100%;
+        display: block;
+    }
+
+    ::ng-deep .mat-mdc-text-field-wrapper {
+        border: none;
+        border-radius: 4px;
+        padding: 0 8px;
+        height: 32px; // Altura fija cómoda
+        transition: all 0.2s ease;
+    }
+
+    ::ng-deep .mat-mdc-form-field-flex {
+        height: 32px;
+        align-items: center;
+    }
+
+    ::ng-deep .mat-mdc-form-field-infix {
+        padding-top: 0;
+        padding-bottom: 0;
+        min-height: 32px;
+        border-top: 0;
+        display: flex;
+        align-items: center;
+    }
+
+    ::ng-deep .mat-mdc-line-ripple,
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+        display: none;
+    }
+}

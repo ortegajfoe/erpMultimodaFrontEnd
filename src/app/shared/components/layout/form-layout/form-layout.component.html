@@ -1,0 +1,34 @@
+<div class="flex flex-col h-full bg-gray-50 layout-container overflow-hidden">
+
+    <header
+        class="flex-none bg-white border-b border-gray-200 px-6 py-3 z-20 shadow-sm flex items-center justify-between sticky top-0">
+
+        <div class="flex flex-col">
+            <h1 class="text-xl font-bold text-gray-900 leading-tight truncate">
+                {{ title }}
+            </h1>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <button mat-stroked-button type="button" (click)="onCancel.emit()"
+                class="!border-gray-300 !text-gray-700 h-9 px-4">
+                Cancelar
+            </button>
+
+            <button mat-flat-button color="primary" [disabled]="!isValid || loading" (click)="onSave.emit()"
+                class="h-9 px-6 shadow-none">
+                <div class="flex items-center">
+                    <mat-spinner *ngIf="loading" diameter="16" class="mr-2 stroke-white"></mat-spinner>
+                    <span>{{ loading ? 'Guardando...' : 'Guardar' }}</span>
+                </div>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow overflow-y-auto p-4 md:p-6 scroll-smooth bg-gray-50/50">
+        <div class="max-w-7xl mx-auto">
+            <ng-content></ng-content>
+        </div>
+    </main>
+
+</div>

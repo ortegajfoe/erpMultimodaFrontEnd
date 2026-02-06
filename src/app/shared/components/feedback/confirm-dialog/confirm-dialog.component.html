@@ -1,0 +1,31 @@
+<div class="relative p-6 text-center bg-white rounded-lg min-w-[320px] max-w-sm mx-auto shadow-xl">
+
+    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full mb-5" [ngClass]="colors.iconBg">
+
+        <mat-icon class="!text-4xl !w-auto !h-auto leading-none" [ngClass]="colors.iconText">
+            {{ iconName }}
+        </mat-icon>
+    </div>
+
+    <h3 class="text-xl font-bold text-gray-900 mb-2 leading-6">
+        {{ data.title }}
+    </h3>
+
+    <div class="mt-2 mb-6">
+        <p class="text-sm text-gray-500 text-center px-2">
+            {{ data.message }}
+        </p>
+    </div>
+
+    <div class="mt-6 flex justify-end gap-3">
+        @if (data.cancelText) {
+        <button mat-stroked-button (click)="dialogRef.close(false)" class="!border-gray-300 !text-gray-700">
+            {{ data.cancelText }}
+        </button>
+        }
+
+        <button mat-flat-button [color]="colors.buttonColor" (click)="dialogRef.close(true)">
+            {{ data.confirmText || 'Confirmar' }}
+        </button>
+    </div>
+</div>

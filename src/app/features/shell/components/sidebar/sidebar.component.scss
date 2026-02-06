@@ -1,0 +1,103 @@
+:host {
+    display: block;
+    height: 100%;
+    z-index: 50;
+    position: relative;
+    background-color: white;
+}
+
+// Navigation Item - Base Style
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 8px; // Inner radius for pills
+    color: #475569; // Slate 600
+    transition: all 0.2s ease-in-out;
+    text-decoration: none;
+    margin-bottom: 2px;
+    cursor: pointer;
+    min-height: 44px;
+
+    // Hover State
+    &:hover {
+        background-color: #f1f5f9; // Slate 100
+        color: #1e293b; // Slate 800
+    }
+
+    // Centered alignment for collapsed mode logic is handled by flex & hiding text
+    // But we need to ensure icon centers
+    &[matTooltip] {
+        justify-content: center;
+    }
+}
+
+.nav-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    color: inherit;
+}
+
+.nav-text {
+    font-size: 0.875rem; // 14px
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s;
+}
+
+// Active State - The "Pill"
+.active-pill {
+    background-color: var(--primary-muted) !important;
+    color: var(--primary-color) !important;
+    font-weight: 600;
+    position: relative;
+
+    .nav-icon {
+        color: var(--primary-color) !important;
+    }
+
+    // Left indicator (Optional, requested in prompt)
+    &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 20px;
+        width: 3px;
+        background-color: var(--primary-color);
+        border-top-right-radius: 3px;
+        border-bottom-right-radius: 3px;
+        display: block; // Visible active indicator
+    }
+}
+
+// Scrollbar refinement
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+
+    &::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 20px;
+    }
+}
+
+// Collapsed Overrides 
+// When collapsed, the parent container shrinks, so we trust flexbox instructions in HTML
+// but we ensure text is strictly hidden there (ngIf).

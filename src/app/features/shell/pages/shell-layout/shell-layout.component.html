@@ -1,0 +1,17 @@
+<mat-sidenav-container #drawerContainer class="h-screen bg-gray-50">
+    <mat-sidenav #sidenav class="border-r border-gray-200 shadow-lg transition-all duration-300"
+        [style.width.px]="sidenavWidth()" [mode]="sidenavMode()" [opened]="isSidenavOpen()" [disableClose]="!isMobile()"
+        (closedStart)="isMobile() ? mobileIsOpen.set(false) : null">
+        <app-sidebar [collapsed]="!isMobile() && isCollapsed()" [openGroupId]="openGroupId()" (navigate)="onNavigate()"
+            (toggle)="toggleSidenav()" (requestExpandGroup)="onExpandGroup($event)"
+            (groupStateChange)="onGroupStateChange($event)"></app-sidebar>
+    </mat-sidenav>
+
+    <mat-sidenav-content class="flex flex-col h-full overflow-hidden">
+        <app-topbar [collapsed]="!isMobile() && isCollapsed()" (toggleSidenav)="toggleSidenav()"></app-topbar>
+
+        <main class="flex-grow p-4 overflow-auto">
+            <router-outlet></router-outlet>
+        </main>
+    </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,97 @@
+<div class="h-full flex flex-col bg-white border-r border-gray-200 transition-all duration-300">
+
+
+    <div class="h-16 flex items-center border-b border-gray-100/50 px-4" [class.justify-between]="!collapsed"
+        [class.justify-center]="collapsed">
+
+
+        <div *ngIf="!collapsed"
+            class="flex items-center gap-3 overflow-hidden whitespace-nowrap animate-in fade-in zoom-in duration-300">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <mat-icon class="text-xl">local_shipping</mat-icon>
+            </div>
+            <span class="font-bold text-gray-800 tracking-tight text-lg">Transporte ERP</span>
+        </div>
+
+
+        <button mat-icon-button (click)="toggle.emit()" class="text-gray-500 hover:text-primary transition-colors">
+            <mat-icon>{{ collapsed ? 'menu' : 'menu_open' }}</mat-icon>
+        </button>
+    </div>
+
+
+    <div class="flex-grow py-4 px-2 space-y-1 overflow-y-auto custom-scrollbar">
+
+
+        <a routerLink="/app/home" routerLinkActive="active-pill" [routerLinkActiveOptions]="{exact: true}"
+            class="nav-item group" [matTooltip]="collapsed ? 'Dashboard' : ''" [matTooltipPosition]="'right'"
+            (click)="navigate.emit()">
+            <mat-icon class="nav-icon">dashboard</mat-icon>
+            <span *ngIf="!collapsed" class="nav-text">Dashboard</span>
+        </a>
+
+
+        <div class="nav-group">
+            <ng-container *ngIf="!collapsed">
+                <div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1">
+                    Sistema
+                </div>
+            </ng-container>
+
+            <a routerLink="/app/sistema/usuarios" routerLinkActive="active-pill" class="nav-item group"
+                [matTooltip]="collapsed ? 'Usuarios' : ''" [matTooltipPosition]="'right'" (click)="navigate.emit()">
+                <mat-icon class="nav-icon">person</mat-icon>
+                <span *ngIf="!collapsed" class="nav-text">Usuarios</span>
+            </a>
+
+            <a routerLink="/app/sistema/empresas" routerLinkActive="active-pill" class="nav-item group"
+                [matTooltip]="collapsed ? 'Empresas' : ''" [matTooltipPosition]="'right'" (click)="navigate.emit()">
+                <mat-icon class="nav-icon">business</mat-icon>
+                <span *ngIf="!collapsed" class="nav-text">Empresas</span>
+            </a>
+        </div>
+
+
+        <div class="nav-group">
+            <ng-container *ngIf="!collapsed">
+                <div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1">
+                    Recursos Humanos
+                </div>
+            </ng-container>
+
+            <a routerLink="/app/rh/trabajadores" routerLinkActive="active-pill" class="nav-item group"
+                [matTooltip]="collapsed ? 'Trabajadores' : ''" [matTooltipPosition]="'right'" (click)="navigate.emit()">
+                <mat-icon class="nav-icon">people</mat-icon>
+                <span *ngIf="!collapsed" class="nav-text">Trabajadores</span>
+            </a>
+
+            <a routerLink="/app/rh/departamentos" routerLinkActive="active-pill" class="nav-item group"
+                [matTooltip]="collapsed ? 'Departamentos' : ''" [matTooltipPosition]="'right'"
+                (click)="navigate.emit()">
+                <mat-icon class="nav-icon">domain</mat-icon>
+                <span *ngIf="!collapsed" class="nav-text">Departamentos</span>
+            </a>
+
+            <a routerLink="/app/rh/puestos" routerLinkActive="active-pill" class="nav-item group"
+                [matTooltip]="collapsed ? 'Puestos' : ''" [matTooltipPosition]="'right'" (click)="navigate.emit()">
+                <mat-icon class="nav-icon">badge</mat-icon>
+                <span *ngIf="!collapsed" class="nav-text">Puestos</span>
+            </a>
+        </div>
+
+    </div>
+
+
+    <div class="p-2 border-t border-gray-100">
+        <a routerLink="/app/settings" routerLinkActive="active-pill" class="nav-item group"
+            [matTooltip]="collapsed ? 'Configuración' : ''" [matTooltipPosition]="'right'" (click)="navigate.emit()">
+            <mat-icon class="nav-icon">settings</mat-icon>
+            <span *ngIf="!collapsed" class="nav-text">Configuración</span>
+        </a>
+
+        <div class="mt-2 flex items-center justify-center text-[10px] text-gray-400 py-2">
+            <span *ngIf="collapsed">v0.2</span>
+            <span *ngIf="!collapsed">Transporte v0.2.0</span>
+        </div>
+    </div>
+</div>

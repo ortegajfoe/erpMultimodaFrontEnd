@@ -1,0 +1,34 @@
+:host {
+    display: block;
+    /* Ensure the host takes full available space in the parent */
+    height: 100%;
+    overflow: hidden;
+}
+
+.layout-container {
+    /* 
+     Height calculation as requested: 100vh - 64px (navbar height) 
+     This forces the container to fit exactly in the remaining viewport space.
+     Adjust '64px' if the requested navbar height changes.
+  */
+    height: calc(100vh - 64px);
+    width: 100%;
+}
+
+/* Optional: Custom scrollbar styling if needed, otherwise browser default */
+main::-webkit-scrollbar {
+    width: 8px;
+}
+
+main::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+main::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+main::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
