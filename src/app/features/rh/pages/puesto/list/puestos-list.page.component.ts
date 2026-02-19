@@ -1,4 +1,4 @@
-import { Component, inject, TemplateRef } from '@angular/core';
+import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -6,7 +6,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { PuestoService } from '../../../services/puesto.service';
 import { Puesto } from '../../../models/puesto.model';
-import { DataTableComponent, DataTableColumn } from '../../../../../shared/components/table/data-table/data-table.component';
+import { SmartTableComponent, TableAction } from '../../../../../shared/components/table';
+import { DataTableColumn } from '../../../../../shared/components/table/data-table/data-table.component';
 import { createCatalogStore } from '../../../../../shared/stores/catalog-store';
 import { BehaviorSubject } from 'rxjs';
 import { switchMap, map } from 'rxjs/operators';
@@ -19,7 +20,7 @@ import { switchMap, map } from 'rxjs/operators';
         MatDialogModule,
         MatSnackBarModule,
         MatButtonModule,
-        DataTableComponent
+        SmartTableComponent
     ],
     templateUrl: './puestos-list.page.component.html',
     styleUrls: ['./puestos-list.page.component.scss']
@@ -32,12 +33,25 @@ export class PuestosListPageComponent {
 
     private refreshTrigger$ = new BehaviorSubject<void>(void 0);
 
-    // Initialize Store
     readonly store = createCatalogStore<Puesto>({
         source$: this.refreshTrigger$.pipe(
             switchMap(() => this.puestoService.getAll().pipe(map(r => r ?? [])))
         ),
-        idKey: 'idPuesto'
+        idKey: 'idPuesto',
+        filterFn: (row, query) => {
+            return Object.entries(query).every(([key, value]) => {
+                if (!value || value.trim() === '') return true;
+                const filterVal = value.toLowerCase();
+
+                if (key === 'global') {
+                    const puesto = (row.puesto || '').toLowerCase();
+                    return puesto.includes(filterVal);
+                }
+
+                const val = String((row as any)[key] ?? '').toLowerCase();
+                return val.includes(filterVal);
+            });
+        }
     });
 
     columns: DataTableColumn<Puesto>[] = [
@@ -46,16 +60,28 @@ export class PuestosListPageComponent {
         { key: 'notas', label: 'Notas', filter: 'text', mobileHidden: false }
     ];
 
+    @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
+
+    onAction(event: TableAction<Puesto>) {
+        switch (event.action) {
+            case 'create':
+                this.onCreate();
+                break;
+            case 'edit':
+                if (event.row) this.onEdit(event.row);
+                break;
+            case 'delete':
+                if (event.row) this.confirmDelete(this.deleteDialog, event.row);
+                break;
+        }
+    }
+
     onCreate() {
         this.router.navigate(['/app/rh/puestos/nuevo']);
     }
 
     onEdit(puesto: Puesto) {
         this.router.navigate(['/app/rh/puestos', puesto.idPuesto, 'editar']);
-    }
-
-    onRemove(puesto: Puesto) {
-        // Handled via dialog
     }
 
     confirmDelete(templateRef: TemplateRef<any>, puesto: Puesto) {

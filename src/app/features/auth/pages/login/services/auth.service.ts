@@ -36,7 +36,15 @@ export class AuthService {
     public currentUser = this._currentUser.asReadonly();
 
     constructor() {
-
+        const savedUser = localStorage.getItem('user_data');
+        if (savedUser) {
+            try {
+                this._currentUser.set(JSON.parse(savedUser));
+            } catch (e) {
+                console.error('Error parsing saved user', e);
+                this.logout();
+            }
+        }
     }
 
     get accessToken() {
@@ -78,6 +86,7 @@ export class AuthService {
         this._currentUser.set(null);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user_data');
         this.router.navigate(['/login']);
     }
 
@@ -90,6 +99,9 @@ export class AuthService {
         }
 
         const { token, refreshToken, ...user } = data;
+
         this._currentUser.set(user);
+
+        localStorage.setItem('user_data', JSON.stringify(user));
     }
 }

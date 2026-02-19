@@ -1,6 +1,4 @@
-// Modern Enterprise Design - Reactive Themes
-// Variables
-$table-header-bg: #0d47a1;
+$table-header-bg: var(--primary-color);
 $table-header-text: #ffffff;
 $table-row-even-bg: #f5f7fa;
 $table-row-hover-bg: #e1e7ef;
@@ -12,10 +10,8 @@ $table-border-color: #e0e0e0;
     padding: 1rem;
 }
 
-// === BASE STYLES ===
 .table-container-wrapper {
     height: 100%;
-    background: white;
     border-radius: var(--border-radius, 12px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     overflow: hidden;
@@ -37,7 +33,6 @@ table {
     border-collapse: collapse;
 }
 
-// Estilos generales de celdas Header
 thead th,
 .mat-mdc-header-cell {
     font-weight: 600;
@@ -46,8 +41,6 @@ thead th,
     font-size: 0.8rem;
     padding: 16px;
     border: none;
-    // position: sticky; // Lo maneja Material
-    // top: 0;
     z-index: 20;
     transition: background-color 0.3s, color 0.3s;
 }
@@ -74,55 +67,91 @@ tbody tr,
     }
 }
 
-// === TEMA 1: GLASS (Azul Corporativo) - MODIFICADO ===
-:host-context(body.theme-table-glass),
-:host-context(body:not(.theme-table-toolbar)) {
-
-    // 1. Títulos: Fondo Azul y Texto Blanco
-    thead tr:not(.filter-row) th,
-    thead tr:not(.filter-row) .mat-mdc-header-cell {
-        background-color: $table-header-bg !important;
-        color: $table-header-text !important;
+:host-context(.dark) {
+    .table-container-wrapper {
+        background: #0f172a;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
-    // 2. Filtros: Fondo Blanco y Texto Oscuro (Limpios)
-    tr.filter-row th,
-    tr.filter-row .mat-mdc-header-cell {
-        background-color: #ffffff !important;
-        border-bottom: 1px solid $table-border-color;
-        padding-top: 8px !important; // Ajuste para que se vea compacto
-        padding-bottom: 8px !important;
+    tbody tr,
+    .mat-mdc-row {
+
+        td,
+        .mat-mdc-cell {
+            border-bottom: 1px solid #1e293b;
+            color: #cbd5e1;
+        }
     }
 
-    // Estilo de Inputs en la fila blanca (tipo Toolbar/Clean)
     .filter-field {
         ::ng-deep .mat-mdc-text-field-wrapper {
-            background-color: #f8fafc !important; // Gris muy suave
-            border: 1px solid #e2e8f0;
-            color: #333;
-            border-radius: 4px;
+            background-color: #1e293b !important;
+            border: 1px solid #334155;
+            color: #f1f5f9;
         }
 
         ::ng-deep .mat-mdc-input-element {
-            color: #333 !important;
+            color: #f1f5f9 !important;
 
             &::placeholder {
-                color: #94a3b8 !important;
+                color: #64748b !important;
             }
         }
+    }
 
-        // Efecto Focus
-        &:focus-within {
-            ::ng-deep .mat-mdc-text-field-wrapper {
-                background-color: #fff !important;
-                border-color: $table-header-bg; // Borde azul al enfocar
-                box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.1);
+    :host-context(body.theme-table-zebra) table,
+    table.table-zebra {
+
+        .mat-mdc-row:nth-of-type(even),
+        tr:nth-of-type(even) {
+            background-color: #1e293b !important;
+
+            &:hover {
+                background-color: #334155 !important;
             }
         }
     }
 }
 
-// === TEMA 2: TOOLBAR (Minimalista) ===
+::ng-deep thead tr:not(.filter-row) th,
+::ng-deep thead tr:not(.filter-row) .mat-mdc-header-cell {
+    background-color: var(--primary-color) !important;
+    color: $table-header-text !important;
+}
+
+tr.filter-row th,
+tr.filter-row .mat-mdc-header-cell {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid $table-border-color;
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+}
+
+.filter-field {
+    ::ng-deep .mat-mdc-text-field-wrapper {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0;
+        color: #333;
+        border-radius: 4px;
+    }
+
+    ::ng-deep .mat-mdc-input-element {
+        color: #333 !important;
+
+        &::placeholder {
+            color: #94a3b8 !important;
+        }
+    }
+
+    &:focus-within {
+        ::ng-deep .mat-mdc-text-field-wrapper {
+            background-color: #fff !important;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(13, 71, 161, 0.1);
+        }
+    }
+}
+
 :host-context(body.theme-table-toolbar) {
     .table-container-wrapper {
         border: 1px solid #e2e8f0;
@@ -155,14 +184,19 @@ tbody tr,
     }
 }
 
-// === ZEBRA STRIPING ===
-:host-context(body.theme-table-zebra) {
-    tbody tr:nth-of-type(even) {
-        background-color: #f8fafc;
+:host-context(body.theme-table-zebra) table,
+table.table-zebra {
+
+    .mat-mdc-row:nth-of-type(even),
+    tr:nth-of-type(even) {
+        background-color: #e2e8f0 !important;
+
+        &:hover {
+            background-color: #94a3b8 !important;
+        }
     }
 }
 
-// === DENSIDAD ===
 :host-context(body.theme-density-compact) {
 
     thead th,
@@ -177,7 +211,6 @@ tbody tr,
         font-size: 0.85rem;
     }
 
-    // Ajuste extra para filtros compactos
     tr.filter-row th {
         padding: 4px 12px !important;
     }
@@ -198,7 +231,6 @@ tbody tr,
     }
 }
 
-// Standard Filter Field Styles (Base)
 .filter-field {
     width: 100%;
     display: block;
@@ -209,29 +241,49 @@ tbody tr,
     }
 
     ::ng-deep .mat-mdc-text-field-wrapper {
-        border: none;
-        border-radius: 4px;
-        padding: 0 8px;
-        height: 32px; // Altura fija cómoda
+        background-color: #f9fafb !important; // gray-50
+        border: 1px solid #e5e7eb; // gray-200
+        border-radius: 6px;
+        padding: 0 12px;
+        height: 36px;
         transition: all 0.2s ease;
     }
 
     ::ng-deep .mat-mdc-form-field-flex {
-        height: 32px;
+        height: 36px;
         align-items: center;
+    }
+
+    ::ng-deep .mat-mdc-input-element {
+        color: #374151 !important; // gray-700
+        caret-color: var(--primary-color);
+        font-size: 0.85rem;
+
+        &::placeholder {
+            color: #9ca3af !important; // gray-400
+        }
     }
 
     ::ng-deep .mat-mdc-form-field-infix {
         padding-top: 0;
         padding-bottom: 0;
-        min-height: 32px;
+        min-height: 36px;
         border-top: 0;
         display: flex;
         align-items: center;
     }
 
     ::ng-deep .mat-mdc-line-ripple,
-    ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-        display: none;
+    ::ng-deep .mat-mdc-form-field-subscript-wrapper,
+    ::ng-deep .mat-mdc-notched-outline {
+        display: none !important;
+    }
+
+    &:focus-within {
+        ::ng-deep .mat-mdc-text-field-wrapper {
+            background-color: #ffffff !important;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
     }
 }

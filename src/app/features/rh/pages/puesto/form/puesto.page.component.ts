@@ -13,6 +13,9 @@ import { PuestoService } from '../../../services/puesto.service';
 import { DepartamentoService } from '../../../services/departamento.service';
 import { Puesto } from '../../../models/puesto.model';
 import { Departamento } from '../../../models/departamento.model';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormLayoutComponent } from '../../../../../shared/components/layout/form-layout/form-layout.component';
+import { UpperCaseInputDirective } from '@shared/ui';
 
 @Component({
     selector: 'app-puesto-page',
@@ -26,7 +29,11 @@ import { Departamento } from '../../../models/departamento.model';
         MatInputModule,
         MatSelectModule,
         MatIconModule,
-        MatSnackBarModule
+        MatIconModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
+        FormLayoutComponent,
+        UpperCaseInputDirective
     ],
     templateUrl: './puesto.page.component.html',
     styleUrls: ['./puesto.page.component.scss']

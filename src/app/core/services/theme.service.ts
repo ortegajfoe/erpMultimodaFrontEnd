@@ -2,40 +2,33 @@ import { Injectable, signal, effect, computed, inject } from '@angular/core';
 import { ConfigStore } from '../stores/config.store';
 
 export interface ThemeSettings {
-    // Appearance
     primaryColor: string;
-    secondaryColor: string; // New
+    secondaryColor: string;
     mode: 'light' | 'dark';
 
-    // Typography
     fontScale: 'small' | 'normal' | 'large';
-    fontFamily: string; // Changed to string for dynamic font
-    baseFontSize: number; // New
+    fontFamily: string;
+    baseFontSize: number;
 
-    // Density
     density: 'compact' | 'normal' | 'comfortable';
 
-    // Buttons
     buttonShape: 'square' | 'rounded' | 'pill';
     buttonStyle: 'flat' | 'stroked';
-    borderRadius: number; // New Global radius
+    borderRadius: number;
 
-    // Inputs
     inputAppearance: 'outline' | 'fill';
     inputRadius: number;
 
-    // Tables
     tableDensity: 'compact' | 'normal' | 'relaxed';
     tableStickyHeader: boolean;
     tableZebra: boolean;
-    tableStyle: 'default' | 'glass' | 'toolbar'; // New table style
+    tableStyle: 'default' | 'glass' | 'toolbar';
 
-    // Config JSON bucket
     componentConfig: any;
 }
 
 const DEFAULT_SETTINGS: ThemeSettings = {
-    primaryColor: '#0d47a1', // Corporate Blue Default
+    primaryColor: '#0d47a1',
     secondaryColor: '#ffffff',
     mode: 'light',
 
@@ -66,92 +59,93 @@ const DEFAULT_SETTINGS: ThemeSettings = {
 export class ThemeService {
     private configStore = inject(ConfigStore);
 
-    // Alias for compatibility with components using this service directly
-    // Use the store's computed signal
     readonly settings = this.configStore.settings;
 
     constructor() {
-        // Effect for Global Token Application
         effect(() => {
             this.applyTheme(this.settings());
         });
 
-        // Effect for Table Styles (Classes)
         effect(() => {
-            const style = this.settings().tableStyle; // Access computed signal value
+            const style = this.settings().tableStyle;
             const body = document.body;
 
-            // Cleanup
             body.classList.remove('theme-table-glass', 'theme-table-toolbar');
 
-            // Apply new
             if (style === 'glass') body.classList.add('theme-table-glass');
             if (style === 'toolbar') body.classList.add('theme-table-toolbar');
         });
     }
 
     init() {
-        // Init Store (fetching ID 1 for now)
         this.configStore.loadConfig(1);
     }
 
-    // Proxy methods to Store
     updateSettings(newSettings: any) {
-        // Map individual updates to store actions
-        // This is a comprehensive mapper to support the legacy component calls
         Object.keys(newSettings).forEach(key => {
             this.configStore.updateSetting(key, newSettings[key]);
         });
     }
 
     saveBackendConfig() {
-        // Store saves automatically on updateSetting (optimistic), 
-        // but if we want a manual "Save" button event that does something else, we can keep this.
-        // For now, let's just log as the store handles saving.
         console.log('Auto-save managed by ConfigStore');
     }
 
     resetDefaults() {
-        // Implement reset logic in store if needed
         console.warn('Reset defaults not fully implemented in Store yet');
+    }
+
+    private getRadiusValue(shape: 'square' | 'rounded' | 'pill', globalRadius: number): string {
+        if (shape === 'square') return '0px';
+        if (shape === 'pill') return '9999px';
+        return `${globalRadius}px`;
     }
 
     private applyTheme(settings: any) {
         const root = document.documentElement;
 
-        // --- GLOBAL Dynamic Variables ---
         root.style.setProperty('--primary-color', settings.primaryColor);
-        root.style.setProperty('--primary-muted', `${settings.primaryColor}14`); // 8% opacity roughly for pills
-        root.style.setProperty('--secondary-color', settings.secondaryColor);
+        root.style.setProperty('--brand-primary', settings.primaryColor);
+
+        root.style.setProperty('--bg-color', settings.backgroundColor);
+        root.style.setProperty('--app-bg', settings.backgroundColor);
+
+        root.style.setProperty('--bg-surface', settings.surfaceColor);
+        root.style.setProperty('--card-bg', settings.surfaceColor);
+
+        root.style.setProperty('--font-main', settings.fontFamily);
         root.style.setProperty('--font-family', settings.fontFamily);
-        root.style.setProperty('--base-font-size', `${settings.baseFontSize}px`);
+
+        root.style.setProperty('--ui-radius', `${settings.borderRadius}px`);
         root.style.setProperty('--border-radius', `${settings.borderRadius}px`);
 
-        // Legacy/Compatibility mapping
-        root.style.setProperty('--erp-primary', settings.primaryColor);
-        root.style.setProperty('--brand-primary', settings.primaryColor);
+        root.style.setProperty('--base-font-size', `${settings.baseFontSize}px`);
+
+        root.style.setProperty('--primary-muted', `${settings.primaryColor}14`);
         root.style.setProperty('--erp-font-family', settings.fontFamily);
 
-        // --- TYPOGRAPHY SCALING relative to base ---
         let scale = 1;
         if (settings.fontScale === 'small') scale = 0.85;
         if (settings.fontScale === 'large') scale = 1.15;
         root.style.setProperty('--font-scale', scale.toString());
 
-        // --- DENSITY ---
+        root.style.setProperty('--btn-radius', this.getRadiusValue(settings.buttonShape, settings.borderRadius));
+        root.style.setProperty('--input-radius', `${settings.inputRadius}px`);
+
+
         const densityClass = `density-${settings.density}`;
         document.body.classList.remove('density-compact', 'density-normal', 'density-comfortable');
         document.body.classList.add(densityClass);
 
-        // --- TABLES ---
         if (settings.tableZebra) document.body.classList.add('theme-table-zebra');
         else document.body.classList.remove('theme-table-zebra');
 
-        // --- MODE ---
         if (settings.mode === 'dark') {
+            root.classList.add('dark');
             document.body.classList.add('dark-theme');
             root.style.setProperty('color-scheme', 'dark');
         } else {
+            root.classList.remove('dark');
             document.body.classList.remove('dark-theme');
             root.style.setProperty('color-scheme', 'light');
         }

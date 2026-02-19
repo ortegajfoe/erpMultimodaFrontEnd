@@ -60,7 +60,7 @@ export function createCatalogStore<T>(opts: CatalogStoreOptions<T>) {
     });
 
     effect(() => {
-        filterQuery(); // dependence
+        filterQuery();
         pageIndex.set(0);
     }, { allowSignalWrites: true });
 
@@ -81,7 +81,6 @@ export function createCatalogStore<T>(opts: CatalogStoreOptions<T>) {
     };
 
     return {
-        // Signals
         loading,
         pageIndex,
         pageSize,
@@ -91,7 +90,6 @@ export function createCatalogStore<T>(opts: CatalogStoreOptions<T>) {
         totalItems,
         pagedItems,
 
-        // Actions
         setFilter,
         clearFilters,
         onPageChange

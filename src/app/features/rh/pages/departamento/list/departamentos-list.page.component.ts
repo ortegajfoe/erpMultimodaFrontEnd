@@ -1,4 +1,4 @@
-import { Component, inject, TemplateRef } from '@angular/core';
+import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -6,7 +6,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { DepartamentoService } from '../../../services/departamento.service';
 import { Departamento } from '../../../models/departamento.model';
-import { DataTableComponent } from '../../../../../shared/components/table/data-table/data-table.component';
+import { SmartTableComponent, TableAction } from '../../../../../shared/components/table';
 import { DataTableColumn } from '../../../../../shared/models/data-table.model';
 import { createCatalogStore } from '../../../../../shared/stores/catalog-store';
 import { BehaviorSubject } from 'rxjs';
@@ -20,7 +20,7 @@ import { switchMap, map } from 'rxjs/operators';
         MatDialogModule,
         MatSnackBarModule,
         MatButtonModule,
-        DataTableComponent
+        SmartTableComponent
     ],
     templateUrl: './departamentos-list.page.component.html',
     styleUrls: ['./departamentos-list.page.component.scss']
@@ -33,12 +33,25 @@ export class DepartamentosListPageComponent {
 
     private refreshTrigger$ = new BehaviorSubject<void>(void 0);
 
-    // Initialize Store
     readonly store = createCatalogStore<Departamento>({
         source$: this.refreshTrigger$.pipe(
             switchMap(() => this.departamentoService.getAll().pipe(map(r => r ?? [])))
         ),
-        idKey: 'idDepartamento'
+        idKey: 'idDepartamento',
+        filterFn: (row, query) => {
+            return Object.entries(query).every(([key, value]) => {
+                if (!value || value.trim() === '') return true;
+                const filterVal = value.toLowerCase();
+
+                if (key === 'global') {
+                    const departamento = (row.departamento || '').toLowerCase();
+                    return departamento.includes(filterVal);
+                }
+
+                const val = String((row as any)[key] ?? '').toLowerCase();
+                return val.includes(filterVal);
+            });
+        }
     });
 
     columns: DataTableColumn<Departamento>[] = [
@@ -46,16 +59,28 @@ export class DepartamentosListPageComponent {
         { key: 'notas', label: 'Notas', filter: 'text', mobileHidden: false }
     ];
 
+    @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
+
+    onAction(event: TableAction<Departamento>) {
+        switch (event.action) {
+            case 'create':
+                this.onCreate();
+                break;
+            case 'edit':
+                if (event.row) this.onEdit(event.row);
+                break;
+            case 'delete':
+                if (event.row) this.confirmDelete(this.deleteDialog, event.row);
+                break;
+        }
+    }
+
     onCreate() {
         this.router.navigate(['/app/rh/departamentos/nuevo']);
     }
 
     onEdit(dept: Departamento) {
         this.router.navigate(['/app/rh/departamentos', dept.idDepartamento, 'editar']);
-    }
-
-    onRemove(dept: Departamento) {
-        // Handled via dialog
     }
 
     confirmDelete(templateRef: TemplateRef<any>, dept: Departamento) {

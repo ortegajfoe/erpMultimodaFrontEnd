@@ -1,4 +1,4 @@
-import { Component, inject, TemplateRef } from '@angular/core';
+import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -6,7 +6,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { map } from 'rxjs/operators';
 import { createCatalogStore } from '../../../../../shared/stores/catalog-store';
-import { DataTableComponent, DataTableColumn } from '../../../../../shared/components/table/data-table/data-table.component';
+import { SmartTableComponent, TableAction } from '../../../../../shared/components/table';
+import { DataTableColumn } from '../../../../../shared/components/table/data-table/data-table.component';
 import { EmpresaService, Empresa } from '../../../services/empresa.service';
 
 @Component({
@@ -17,7 +18,7 @@ import { EmpresaService, Empresa } from '../../../services/empresa.service';
         MatDialogModule,
         MatSnackBarModule,
         MatButtonModule,
-        DataTableComponent
+        SmartTableComponent
     ],
     templateUrl: './empresas-list.page.component.html',
     styleUrls: ['./empresas-list.page.component.scss']
@@ -35,6 +36,13 @@ export class EmpresasListPageComponent {
             return Object.entries(query).every(([key, value]) => {
                 if (!value || value.trim() === '') return true;
                 const filterVal = value.toLowerCase();
+
+                if (key === 'global') {
+                    const nombre = (row.nombre || '').toLowerCase();
+                    const rfc = (row.rfc || '').toLowerCase();
+                    return nombre.includes(filterVal) || rfc.includes(filterVal);
+                }
+
                 const val = String((row as any)[key] ?? '').toLowerCase();
                 return val.includes(filterVal);
             });
@@ -48,16 +56,28 @@ export class EmpresasListPageComponent {
         { key: 'email', label: 'Email', filter: 'text', mobileHidden: true }
     ];
 
+    @ViewChild('deleteConfirmDialog') deleteConfirmDialog!: TemplateRef<any>;
+
+    onAction(event: TableAction<Empresa>) {
+        switch (event.action) {
+            case 'create':
+                this.onCreate();
+                break;
+            case 'edit':
+                if (event.row) this.onEdit(event.row);
+                break;
+            case 'delete':
+                if (event.row) this.confirmDelete(this.deleteConfirmDialog, event.row);
+                break;
+        }
+    }
+
     onCreate() {
         this.router.navigate(['/app/sistema/empresas/nuevo']);
     }
 
     onEdit(empresa: Empresa) {
         this.router.navigate(['/app/sistema/empresas', empresa.idEmpresa, 'editar']);
-    }
-
-    onRemove(empresa: Empresa) {
-        // Trigger confirmation
     }
 
     confirmDelete(templateRef: TemplateRef<any>, empresa: Empresa) {

@@ -21,6 +21,7 @@ export class ToolbarTableComponent<T> implements OnChanges, AfterViewInit {
     @Input() total: number = 0;
     @Input() pageSize: number = 10;
     @Input() loading: boolean = false;
+    @Input() zebra = false;
     @Output() pageChange = new EventEmitter<PageEvent>();
     @Output() sortChange = new EventEmitter<Sort>();
     @Output() filterChange = new EventEmitter<string>();

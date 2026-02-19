@@ -23,6 +23,11 @@ th.mat-mdc-header-cell {
     border-bottom: 2px solid #e2e8f0;
 }
 
-:host-context(body.theme-table-zebra) tr.mat-mdc-row:nth-child(even) {
-    background-color: #f9fafb;
+:host-context(body.theme-table-zebra) table,
+table.table-zebra {
+
+    .mat-mdc-row:nth-of-type(even),
+    tr:nth-of-type(even) {
+        background-color: #e2e8f0 !important;
+    }
 }

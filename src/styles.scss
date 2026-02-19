@@ -14,10 +14,15 @@
 :root {
   --primary-color: #0f172a;
   --primary-muted: #0f172a14;
-  --secondary-color: #ffffff;
+  --secondary-color: #f8fafc;
   --font-family: 'Inter', sans-serif;
   --base-font-size: 14px;
   --border-radius: 12px;
+  --btn-radius: 4px;
+  /* New */
+  --input-radius: 4px;
+  /* New */
+
   --font-scale: 1;
 
   --app-bg: #f9fafb;
@@ -101,7 +106,7 @@ input,
 }
 
 
-@import './assets/scss/components/tables';
+
 
 .cdk-overlay-container {
   position: fixed !important;
@@ -137,4 +142,21 @@ input,
 .cdk-overlay-dark-backdrop {
   background: rgba(0, 0, 0, 0.6) !important;
   backdrop-filter: blur(4px);
+}
+
+.glass-dialog-container {
+  .mat-mdc-dialog-container {
+    --mdc-dialog-container-color: transparent !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37) !important;
+    border-radius: 24px !important;
+
+    .mdc-dialog__surface {
+      background-color: transparent !important;
+      box-shadow: none !important;
+    }
+  }
 }

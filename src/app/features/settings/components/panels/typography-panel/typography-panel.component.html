@@ -1,34 +1,36 @@
-<mat-card class="p-0 overflow-hidden border border-gray-200 shadow-sm">
-    <div class="p-4 border-b bg-gray-50 font-medium text-gray-700">Fuentes</div>
+<mat-card class="p-0 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-slate-900">
+    <div
+        class="p-4 border-b bg-gray-50 dark:bg-slate-800/50 font-medium text-gray-700 dark:text-white border-gray-200 dark:border-gray-700">
+        Fuentes</div>
     <div class="p-6 flex flex-col gap-6">
         <div>
-            <h4 class="font-medium mb-4 text-gray-900">Familia Tipográfica</h4>
+            <h4 class="font-medium mb-4 text-gray-900 dark:text-white">Familia Tipográfica</h4>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div (click)="updateFontFamily('inter')"
-                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 transition-all"
+                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all dark:border-gray-600"
                     [class.border-primary]="themeService.settings().fontFamily === 'inter'"
                     [class.bg-blue-50]="themeService.settings().fontFamily === 'inter'"
                     [class.border-transparent]="themeService.settings().fontFamily !== 'inter'">
-                    <div class="font-bold text-lg mb-1" style="font-family: 'Inter', sans-serif;">Ag
+                    <div class="font-bold text-lg mb-1 dark:text-white" style="font-family: 'Inter', sans-serif;">Ag
                     </div>
-                    <div class="font-medium text-sm">Inter</div>
+                    <div class="font-medium text-sm dark:text-gray-200">Inter</div>
                     <div class="text-xs text-gray-400">Estándar</div>
                 </div>
                 <div (click)="updateFontFamily('roboto')"
-                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 transition-all bg-white border-gray-100"
+                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-700"
                     [class.border-primary]="themeService.settings().fontFamily === 'roboto'"
                     [class.bg-blue-50]="themeService.settings().fontFamily === 'roboto'">
-                    <div class="font-bold text-lg mb-1" style="font-family: 'Roboto', sans-serif;">Ag
+                    <div class="font-bold text-lg mb-1 dark:text-white" style="font-family: 'Roboto', sans-serif;">Ag
                     </div>
-                    <div class="font-medium text-sm">Roboto</div>
+                    <div class="font-medium text-sm dark:text-gray-200">Roboto</div>
                     <div class="text-xs text-gray-400">Android</div>
                 </div>
                 <div (click)="updateFontFamily('system')"
-                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 transition-all bg-white border-gray-100"
+                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all bg-white dark:bg-slate-800 border-gray-100 dark:border-gray-700"
                     [class.border-primary]="themeService.settings().fontFamily === 'system'"
                     [class.bg-blue-50]="themeService.settings().fontFamily === 'system'">
-                    <div class="font-bold text-lg mb-1" style="font-family: system-ui;">Ag</div>
-                    <div class="font-medium text-sm">System</div>
+                    <div class="font-bold text-lg mb-1 dark:text-white" style="font-family: system-ui;">Ag</div>
+                    <div class="font-medium text-sm dark:text-gray-200">System</div>
                     <div class="text-xs text-gray-400">Nativo</div>
                 </div>
             </div>
@@ -37,15 +39,15 @@
         <mat-divider></mat-divider>
 
         <div>
-            <h4 class="font-medium mb-3 text-gray-900">Tamaño de Texto (Escala)</h4>
-            <div class="flex items-center gap-6 bg-gray-50 p-4 rounded-lg">
+            <h4 class="font-medium mb-3 text-gray-900 dark:text-white">Tamaño de Texto (Escala)</h4>
+            <div class="flex items-center gap-6 bg-gray-50 dark:bg-slate-800 p-4 rounded-lg">
                 <span class="text-xs font-bold text-gray-400">A</span>
                 <mat-slider min="0" max="2" step="1" showTickMarks class="flex-grow">
                     <input matSliderThumb
                         [ngModel]="['small','normal','large'].indexOf(themeService.settings().fontScale)"
                         (ngModelChange)="updateFontScale($event)">
                 </mat-slider>
-                <span class="text-xl font-bold text-gray-800">A</span>
+                <span class="text-xl font-bold text-gray-800 dark:text-white">A</span>
             </div>
             <div class="flex justify-between text-xs text-gray-400 mt-2 px-2">
                 <span>Pequeño</span>

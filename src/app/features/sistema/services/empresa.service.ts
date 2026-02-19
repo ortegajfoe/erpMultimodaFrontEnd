@@ -20,7 +20,7 @@ export interface Empresa {
     notas?: string;
     userAlta?: number;
     userMod?: number;
-    active?: boolean; // Just in case
+    active?: boolean;
 }
 
 export interface ApiResponse<T> {

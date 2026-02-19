@@ -1,230 +1,281 @@
 <app-form-layout [title]="pageTitle" moduleName="RH" subtitle="Gestión de información del trabajador"
-    [loading]="loading()" [isValid]="form.valid" (onSave)="save()" (onCancel)="cancel()">
-    <form [formGroup]="form" class="space-y-4">
+    [loading]="loading()" [isValid]="true" (onSave)="save()" (onCancel)="cancel()">
 
+    <ng-template #formContent>
+        <form [formGroup]="form" class="space-y-4">
 
-        <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
-            <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
-                <mat-icon class="text-blue-500 scale-90">person</mat-icon>
-                Datos Personales
-            </h3>
+            <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
+                <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
+                    <mat-icon class="text-blue-500 scale-90">person</mat-icon>
+                    Datos Personales
+                </h3>
 
+                <div class="flex flex-col md:flex-row gap-6">
 
-            <div class="flex flex-col md:flex-row gap-6">
+                    <div class="flex-none flex justify-center md:justify-start">
+                        <div class="relative group cursor-pointer w-32 h-32 rounded-full ring-4 ring-gray-100 overflow-hidden shadow-inner bg-gray-50"
+                            (click)="fileInput.click()">
 
-                <div class="flex-none flex justify-center md:justify-start">
-                    <div class="relative group cursor-pointer w-32 h-32 rounded-full ring-4 ring-gray-100 overflow-hidden shadow-inner bg-gray-50"
-                        (click)="fileInput.click()">
+                            @if (photoPreview() || currentPhotoUrl) {
 
-                        @if (photoPreview() || currentPhotoUrl) {
-
-                        <img [src]="photoPreview() || apiUrl + currentPhotoUrl"
-                            class="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Avatar">
-                        } @else {
-                        <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
-                            <mat-icon class="scale-150">person</mat-icon>
-                        </div>
-                        }
-
-
-                        <ng-template #placeholderInfo>
-                            <div class="flex flex-col items-center justify-center w-full h-full text-gray-400">
-                                <mat-icon class="scale-150">add_a_photo</mat-icon>
+                            <img [src]="photoPreview() || apiUrl + currentPhotoUrl"
+                                class="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                alt="Avatar">
+                            } @else {
+                            <div class="w-full h-full flex items-center justify-center bg-gray-200 text-gray-400">
+                                <mat-icon class="scale-150">person</mat-icon>
                             </div>
-                        </ng-template>
+                            }
 
 
-                        <div
-                            class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
-                            <mat-icon class="text-white scale-125">photo_camera</mat-icon>
+                            <ng-template #placeholderInfo>
+                                <div class="flex flex-col items-center justify-center w-full h-full text-gray-400">
+                                    <mat-icon class="scale-150">add_a_photo</mat-icon>
+                                </div>
+                            </ng-template>
+
+
+                            <div
+                                class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
+                                <mat-icon class="text-white scale-125">photo_camera</mat-icon>
+                            </div>
                         </div>
+
+
+                        <input #fileInput type="file" (change)="onPhotoSelected($event)" class="hidden"
+                            accept="image/*">
                     </div>
 
 
-                    <input #fileInput type="file" (change)="onPhotoSelected($event)" class="hidden" accept="image/*">
+                    <div class="flex-grow grid grid-cols-12 gap-3">
+
+
+                        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                            <mat-label>Nombre</mat-label>
+                            <input matInput formControlName="nombre" placeholder="Ej. Juan" appUpperCase>
+                            <mat-error>Requerido</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                            <mat-label>Apellido Paterno</mat-label>
+                            <input matInput formControlName="apPaterno" placeholder="Ej. Perez" appUpperCase>
+                            <mat-error>Requerido</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                            <mat-label>Apellido Materno</mat-label>
+                            <input matInput formControlName="apMaterno" placeholder="Ej. Lopez" appUpperCase>
+                        </mat-form-field>
+
+
+                        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                            <mat-label>Fecha de Nacimiento</mat-label>
+                            <input matInput [matDatepicker]="pickerNac" formControlName="fechaNacimiento">
+                            <mat-datepicker-toggle matIconSuffix [for]="pickerNac"></mat-datepicker-toggle>
+                            <mat-datepicker #pickerNac></mat-datepicker>
+                            <mat-error>Requerido</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                            <mat-label>RFC</mat-label>
+                            <input matInput formControlName="rfc" placeholder="ABCD800101XXX" appUpperCase
+                                maxlength="13">
+                            <mat-error>RFC Invalido (Física 13, Moral 12)</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                            <mat-label>CURP</mat-label>
+                            <input matInput formControlName="curp" appUpperCase maxlength="18">
+                            <mat-error>CURP Invalido (18 caracteres)</mat-error>
+                        </mat-form-field>
+
+                    </div>
                 </div>
+            </div>
 
 
-                <div class="flex-grow grid grid-cols-12 gap-3">
+            <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
+                <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
+                    <mat-icon class="text-green-500 scale-90">home</mat-icon>
+                    Domicilio
+                </h3>
 
+                <div class="grid grid-cols-12 gap-3">
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                        <mat-label>Nombre</mat-label>
-                        <input matInput formControlName="nombre" placeholder="Ej. Juan">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-3">
+                        <mat-label>País</mat-label>
+                        <mat-select formControlName="pais">
+                            <mat-option [value]="1">MÉXICO</mat-option>
+                            <mat-option [value]="2">USA</mat-option>
+                        </mat-select>
                         <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                        <mat-label>Apellido Paterno</mat-label>
-                        <input matInput formControlName="apPaterno" placeholder="Ej. Perez">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
+                        <mat-label>CP</mat-label>
+                        <input matInput type="number" formControlName="cp" placeholder="00000" maxlength="5">
+                        <mat-error>5 dígitos</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-3">
+                        <mat-label>Ciudad (ID)</mat-label>
+                        <input matInput type="number" formControlName="ciudad">
                         <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                        <mat-label>Apellido Materno</mat-label>
-                        <input matInput formControlName="apMaterno" placeholder="Ej. Lopez">
-                    </mat-form-field>
-
-
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                        <mat-label>Fecha de Nacimiento</mat-label>
-                        <input matInput [matDatepicker]="pickerNac" formControlName="fechaNacimiento">
-                        <mat-datepicker-toggle matIconSuffix [for]="pickerNac"></mat-datepicker-toggle>
-                        <mat-datepicker #pickerNac></mat-datepicker>
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
+                        <mat-label>Estado (ID)</mat-label>
+                        <input matInput type="number" formControlName="estado">
                         <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                        <mat-label>RFC</mat-label>
-                        <input matInput formControlName="rfc" placeholder="ABCD800101XXX">
-                        <mat-error>Min 10, Max 13</mat-error>
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
+                        <mat-label>Colonia</mat-label>
+                        <input matInput formControlName="colonia" appUpperCase>
+                        <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                        <mat-label>CURP</mat-label>
-                        <input matInput formControlName="curp">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-8">
+                        <mat-label>Calle</mat-label>
+                        <input matInput formControlName="direccion" appUpperCase>
+                        <mat-error>Requerido</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
+                        <mat-label>No. Ext</mat-label>
+                        <input matInput type="number" formControlName="numExt" maxlength="5">
+                        <mat-error>5 dígitos</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
+                        <mat-label>No. Int</mat-label>
+                        <input matInput type="number" formControlName="numInt" maxlength="5">
+                        <mat-error>5 dígitos</mat-error>
                     </mat-form-field>
 
                 </div>
             </div>
-        </div>
 
 
-        <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
-            <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
-                <mat-icon class="text-green-500 scale-90">home</mat-icon>
-                Domicilio
-            </h3>
+            <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
+                <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
+                    <mat-icon class="text-purple-500 scale-90">work</mat-icon>
+                    Información Laboral
+                </h3>
 
-            <div class="grid grid-cols-12 gap-3">
+                <div class="grid grid-cols-12 gap-3">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                        <mat-label>NSS</mat-label>
+                        <input matInput formControlName="nss">
+                    </mat-form-field>
 
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-8">
-                    <mat-label>Calle</mat-label>
-                    <input matInput formControlName="direccion">
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                        <mat-label>Fecha de Ingreso</mat-label>
+                        <input matInput [matDatepicker]="pickerIngreso" formControlName="fechaIngreso">
+                        <mat-datepicker-toggle matIconSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
+                        <mat-datepicker #pickerIngreso></mat-datepicker>
+                        <mat-error>Requerido</mat-error>
+                    </mat-form-field>
 
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
-                    <mat-label>No. Ext</mat-label>
-                    <input matInput formControlName="numExt">
-                    <mat-error>Req</mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
-                    <mat-label>No. Int</mat-label>
-                    <input matInput formControlName="numInt">
-                </mat-form-field>
-
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-5">
-                    <mat-label>Colonia</mat-label>
-                    <input matInput formControlName="colonia">
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
-                    <mat-label>CP</mat-label>
-                    <input matInput formControlName="cp" placeholder="00000" maxlength="5">
-                    <mat-error>5 dígitos</mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-5">
-                    <mat-label>Ciudad</mat-label>
-                    <input matInput type="number" formControlName="ciudad">
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                        <mat-label>Salario Mensual</mat-label>
+                        <input matInput type="number" formControlName="salarioMensual" placeholder="0.00">
+                        <span matTextPrefix>$&nbsp;</span>
+                        <mat-error>Min 0</mat-error>
+                    </mat-form-field>
 
 
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
-                    <mat-label>Estado</mat-label>
-                    <input matInput type="number" formControlName="estado">
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
+                        <mat-label>Departamento</mat-label>
+                        <mat-select formControlName="idDepartamento">
+                            @for (dept of departamentos(); track dept.idDepartamento) {
+                            <mat-option [value]="dept.idDepartamento">
+                                {{dept.departamento}}
+                            </mat-option>
+                            } @empty {
+                            <mat-option disabled>No hay departamentos</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Requerido</mat-error>
+                    </mat-form-field>
 
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
-                    <mat-label>País</mat-label>
-                    <input matInput type="number" formControlName="pais">
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
+                        <mat-label>Puesto</mat-label>
+                        <mat-select formControlName="idPuesto">
+                            @for (to of puestos(); track to.idPuesto) {
+                            <mat-option [value]="to.idPuesto">
+                                {{to.puesto}}
+                            </mat-option>
+                            } @empty {
+                            <mat-option disabled>No hay puestos disponibles</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Requerido</mat-error>
+                    </mat-form-field>
+
+
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
+                        <mat-label>Nivel</mat-label>
+                        <mat-select formControlName="idNivel">
+                            @for (nivel of niveles(); track nivel.idNivel) {
+                            <mat-option [value]="nivel.idNivel">
+                                {{nivel.nivel}}
+                            </mat-option>
+                            } @empty {
+                            <mat-option disabled>No hay niveles disponibles</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Requerido</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
+                        <mat-label>Tipo Trabajador</mat-label>
+                        <mat-select formControlName="tipoTrabajador">
+                            @for (tipo of tiposTrabajador(); track tipo.idTipoTrabajador) {
+                            <mat-option [value]="tipo.idTipoTrabajador">
+                                {{tipo.tipoTrabajador}}
+                            </mat-option>
+                            } @empty {
+                            <mat-option disabled>No hay tipos disponibles</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Requerido</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-span-12">
+                        <mat-label>Notas</mat-label>
+                        <textarea matInput formControlName="notas" rows="3" appUpperCase></textarea>
+                    </mat-form-field>
+                </div>
             </div>
-        </div>
 
+        </form>
+    </ng-template>
 
-        <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
-            <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
-                <mat-icon class="text-purple-500 scale-90">work</mat-icon>
-                Información Laboral
-            </h3>
+    @if (id()) {
+    <mat-tab-group animationDuration="0ms" class="bg-transparent" [(selectedIndex)]="selectedTabIndex">
 
-            <div class="grid grid-cols-12 gap-3">
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                    <mat-label>NSS</mat-label>
-                    <input matInput formControlName="nss">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                    <mat-label>Fecha de Ingreso</mat-label>
-                    <input matInput [matDatepicker]="pickerIngreso" formControlName="fechaIngreso">
-                    <mat-datepicker-toggle matIconSuffix [for]="pickerIngreso"></mat-datepicker-toggle>
-                    <mat-datepicker #pickerIngreso></mat-datepicker>
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
-                    <mat-label>Salario Mensual</mat-label>
-                    <input matInput type="number" formControlName="salarioMensual" placeholder="0.00">
-                    <span matTextPrefix>$&nbsp;</span>
-                    <mat-error>Min 0</mat-error>
-                </mat-form-field>
-
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
-                    <mat-label>Departamento</mat-label>
-                    <mat-select formControlName="idDepartamento">
-                        @for (dept of departamentos; track dept.idDepartamento) {
-                        <mat-option [value]="dept.idDepartamento">
-                            {{dept.departamento}}
-                        </mat-option>
-                        } @empty {
-                        <mat-option disabled>No hay departamentos</mat-option>
-                        }
-                    </mat-select>
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
-                    <mat-label>Puesto</mat-label>
-                    <mat-select formControlName="idPuesto">
-                        @for (to of puestos; track to.idPuesto) {
-                        <mat-option [value]="to.idPuesto">
-                            {{to.puesto}}
-                        </mat-option>
-                        } @empty {
-                        <mat-option disabled>No hay puestos disponibles</mat-option>
-                        }
-                    </mat-select>
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
-
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
-                    <mat-label>Nivel (ID)</mat-label>
-                    <input matInput type="number" formControlName="idNivel">
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
-                    <mat-label>Tipo Trabajador</mat-label>
-                    <input matInput type="number" formControlName="tipoTrabajador" placeholder="1">
-                    <mat-error>Requerido</mat-error>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="col-span-12">
-                    <mat-label>Notas</mat-label>
-                    <textarea matInput formControlName="notas" rows="3"></textarea>
-                </mat-form-field>
+        <mat-tab label="General">
+            <div class="pt-4">
+                <ng-container *ngTemplateOutlet="formContent"></ng-container>
             </div>
-        </div>
+        </mat-tab>
 
-    </form>
+        <mat-tab label="Datos Bancarios">
+            <div class="p-4">
+                <app-trabajador-bancos [idTrabajador]="id()!"></app-trabajador-bancos>
+            </div>
+        </mat-tab>
+
+        <mat-tab label="Expediente Digital">
+            <div class="p-4">
+                <app-trabajador-documentos [idTrabajador]="id()!"></app-trabajador-documentos>
+            </div>
+        </mat-tab>
+
+    </mat-tab-group>
+    } @else {
+    <ng-container *ngTemplateOutlet="formContent"></ng-container>
+    }
+
 </app-form-layout>

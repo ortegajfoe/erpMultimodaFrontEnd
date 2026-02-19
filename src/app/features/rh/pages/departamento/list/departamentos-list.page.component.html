@@ -1,9 +1,9 @@
-<app-data-table title="Departamentos" subtitle="Gestión de áreas y departamentos" [rows]="store.pagedItems()"
+<app-smart-table title="Departamentos" subtitle="Gestión de áreas y departamentos" [data]="store.pagedItems()"
     [columns]="columns" [total]="store.totalItems()" [pageIndex]="store.pageIndex()" [pageSize]="store.pageSize()"
-    [loading]="store.loading()" [showCreate]="true" createText="Nuevo Departamento" (create)="onCreate()"
-    (edit)="onEdit($event)" (remove)="confirmDelete(deleteDialog, $event)" (pageChange)="store.onPageChange($event)"
-    (filterChange)="store.setFilter($event.key, $event.value)" (clearFilters)="store.clearFilters()">
-</app-data-table>
+    [loading]="store.loading()" [showCreate]="true" createText="Nuevo Departamento" (onAction)="onAction($event)"
+    (onPageChange)="store.onPageChange($event)" (onFilterChange)="store.setFilter($event.key, $event.value)"
+    (clearFilters)="store.clearFilters()">
+</app-smart-table>
 
 
 <ng-template #deleteDialog let-data>

@@ -8,6 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormLayoutComponent } from '../../../../../shared/components/layout/form-layout/form-layout.component';
+import { UpperCaseInputDirective } from '@shared/ui';
 import { EmpresaService } from '../../../services/empresa.service';
 
 @Component({
@@ -21,7 +24,11 @@ import { EmpresaService } from '../../../services/empresa.service';
         MatButtonModule,
         MatCardModule,
         MatIconModule,
-        MatSnackBarModule
+        MatIconModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
+        FormLayoutComponent,
+        UpperCaseInputDirective
     ],
     templateUrl: './empresa-form.page.component.html',
     styleUrls: ['./empresa-form.page.component.scss']
@@ -43,11 +50,11 @@ export class EmpresaFormPageComponent implements OnInit {
         direccion: [''],
         telefono: [''],
         email: ['', [Validators.email]],
-        idRegimenFiscal: [null as number | null], // Number input
+        idRegimenFiscal: [null as number | null],
         logoUrl: [''],
-        estado: ['Activo'], // Default
-        idMoneda: [1], // Default MXN
-        idPais: [1], // Default Mexico
+        estado: ['Activo'],
+        idMoneda: [1],
+        idPais: [1],
         idCiudad: [null as number | null],
         cp: [''],
         notas: ['']
@@ -91,6 +98,14 @@ export class EmpresaFormPageComponent implements OnInit {
                 this.router.navigate(['/app/sistema/empresas']);
             }
         });
+    }
+
+    save() {
+        this.onSubmit();
+    }
+
+    cancel() {
+        this.onCancel();
     }
 
     onSubmit() {

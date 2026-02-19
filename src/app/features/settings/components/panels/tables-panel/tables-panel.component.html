@@ -1,33 +1,37 @@
-<mat-card class="p-0 overflow-hidden border border-gray-200 shadow-sm">
-    <div class="p-4 border-b bg-gray-50 font-medium text-gray-700">Tablas</div>
+<mat-card class="p-0 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-slate-900">
+    <div
+        class="p-4 border-b bg-gray-50 dark:bg-slate-800/50 font-medium text-gray-700 dark:text-white border-gray-200 dark:border-gray-700">
+        Tablas</div>
     <div class="p-6 flex flex-col gap-6">
 
         <div>
-            <h4 class="font-medium mb-4 text-gray-900">Diseño de Tabla</h4>
+            <h4 class="font-medium mb-4 text-gray-900 dark:text-white">Diseño de Tabla</h4>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div (click)="updateTableLayout('embedded')"
-                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 transition-all flex items-center gap-3"
+                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all flex items-center gap-3 dark:border-gray-600"
                     [class.border-primary]="themeService.settings().tableLayout === 'embedded'"
                     [class.bg-blue-50]="themeService.settings().tableLayout === 'embedded'">
-                    <div class="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-500">
+                    <div
+                        class="h-10 w-10 bg-gray-200 dark:bg-slate-700 rounded flex items-center justify-center text-gray-500 dark:text-gray-300">
                         <mat-icon>table_chart</mat-icon>
                     </div>
                     <div>
-                        <div class="font-medium text-sm">Filtros Integrados</div>
-                        <div class="text-xs text-gray-500">Clásico. Filtros en columnas.</div>
+                        <div class="font-medium text-sm dark:text-white">Filtros Integrados</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Clásico. Filtros en columnas.</div>
                     </div>
                 </div>
 
                 <div (click)="updateTableLayout('toolbar')"
-                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 transition-all flex items-center gap-3"
+                    class="cursor-pointer border-2 rounded-xl p-4 hover:bg-gray-50 dark:hover:bg-slate-800 transition-all flex items-center gap-3 dark:border-gray-600"
                     [class.border-primary]="themeService.settings().tableLayout === 'toolbar'"
                     [class.bg-blue-50]="themeService.settings().tableLayout === 'toolbar'">
-                    <div class="h-10 w-10 bg-gray-200 rounded flex items-center justify-center text-gray-500">
+                    <div
+                        class="h-10 w-10 bg-gray-200 dark:bg-slate-700 rounded flex items-center justify-center text-gray-500 dark:text-gray-300">
                         <mat-icon>view_agenda</mat-icon>
                     </div>
                     <div>
-                        <div class="font-medium text-sm">Barra de Herramientas</div>
-                        <div class="text-xs text-gray-500">Moderno. Toolbar externo.</div>
+                        <div class="font-medium text-sm dark:text-white">Barra de Herramientas</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-400">Moderno. Toolbar externo.</div>
                     </div>
                 </div>
             </div>
@@ -35,7 +39,7 @@
         <mat-divider></mat-divider>
 
         <div>
-            <h4 class="font-medium mb-3 text-gray-900">Densidad de Filas</h4>
+            <h4 class="font-medium mb-3 text-gray-900 dark:text-white">Densidad de Filas</h4>
             <mat-chip-listbox [ngModel]="themeService.settings().tableDensity"
                 (ngModelChange)="updateTableDensity($event)" aria-label="Densidad de tabla">
                 <mat-chip-option value="compact">Compacta</mat-chip-option>
@@ -46,8 +50,8 @@
         <mat-divider></mat-divider>
         <div class="flex items-center justify-between">
             <div>
-                <h4 class="font-medium text-gray-900">Filas Alternadas (Zebra)</h4>
-                <p class="text-xs text-gray-500">Colorea filas pares para mejor legibilidad.</p>
+                <h4 class="font-medium text-gray-900 dark:text-white">Filas Alternadas (Zebra)</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Colorea filas pares para mejor legibilidad.</p>
             </div>
             <mat-slide-toggle [ngModel]="themeService.settings().tableZebra" (ngModelChange)="updateTableZebra($event)"
                 color="primary">

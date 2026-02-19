@@ -1,0 +1,99 @@
+<div class="space-y-4">
+    <div class="flex justify-between items-center">
+        <h3 class="text-lg font-medium text-gray-800">Cuentas Bancarias</h3>
+        <button mat-flat-button color="primary" (click)="toggleForm()" *ngIf="!showForm()">
+            <mat-icon>add</mat-icon> Agregar Cuenta
+        </button>
+    </div>
+
+    @if (showForm()) {
+    <div class="app-card p-4 rounded-lg bg-gray-50 border border-blue-200 mb-4 animate-fade-in">
+        <h4 class="text-md font-semibold mb-3">{{ editingId() ? 'Editar Cuenta' : 'Nueva Cuenta' }}</h4>
+        <form [formGroup]="form" (ngSubmit)="save()" class="grid grid-cols-12 gap-4">
+
+            <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                <mat-label>Banco</mat-label>
+                <mat-select formControlName="idBanco">
+                    @for (banco of bancos; track banco.id) {
+                    <mat-option [value]="banco.id">{{ banco.nombre }}</mat-option>
+                    }
+                </mat-select>
+                <mat-error>Requerido</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                <mat-label>Cuenta (10 dígitos)</mat-label>
+                <input matInput formControlName="cuenta" appOnlyNumbers [maxLen]="10">
+                <mat-error>10 dígitos numéricos</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                <mat-label>CLABE (18 dígitos)</mat-label>
+                <input matInput formControlName="clabeInterbancaria" appOnlyNumbers [maxLen]="18">
+                <mat-error>18 dígitos numéricos</mat-error>
+            </mat-form-field>
+
+            <div class="col-span-12 md:col-span-6 flex items-center">
+                <mat-slide-toggle formControlName="preferida" color="primary">Cuenta Preferida /
+                    Activa</mat-slide-toggle>
+            </div>
+
+            <mat-form-field appearance="outline" class="col-span-12">
+                <mat-label>Notas</mat-label>
+                <textarea matInput formControlName="notas" rows="2" appUpperCase></textarea>
+            </mat-form-field>
+
+            <!-- <div class="col-span-12 flex justify-end gap-2">
+                <button mat-button type="button" (click)="cancelEdit()">Cancelar</button>
+                <button mat-flat-button color="primary" type="submit">Guardar</button>
+            </div> -->
+        </form>
+    </div>
+    }
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (item of datosBancarios(); track item.idDatosBancarios) {
+        <div class="bank-card p-4 rounded-lg bg-white shadow-sm border border-gray-200 relative group"
+            [class.active]="item.preferida">
+
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+                <button mat-icon-button color="accent" (click)="edit(item)" matTooltip="Editar">
+                    <mat-icon class="scale-90">edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" (click)="delete(item)" matTooltip="Eliminar">
+                    <mat-icon class="scale-90">delete</mat-icon>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                    <mat-icon>account_balance</mat-icon>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-800">{{ getBancoNombre(item.idBanco) }}</h4>
+                    @if (item.preferida) {
+                    <span class="text-xs font-medium text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Activa</span>
+                    }
+                </div>
+            </div>
+
+            <div class="space-y-1 text-sm text-gray-600 mt-3">
+                <div class="flex justify-between">
+                    <span>Cuenta:</span>
+                    <span class="font-mono">{{ item.cuenta }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>CLABE:</span>
+                    <span class="font-mono">{{ item.clabeInterbancaria }}</span>
+                </div>
+            </div>
+        </div>
+        } @empty {
+        <div
+            class="col-span-full py-8 text-center text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <mat-icon class="scale-150 mb-2">credit_card_off</mat-icon>
+            <p>No hay cuentas bancarias registradas</p>
+        </div>
+        }
+    </div>
+</div>

@@ -1,11 +1,9 @@
-<div class="page-container">
-    <app-data-table title="Usuarios" subtitle="Gestión de usuarios del sistema" [columns]="columns"
-        [rows]="store.pagedItems()" [total]="store.totalItems()" [loading]="store.loading()"
-        [pageIndex]="store.pageIndex()" [pageSize]="store.pageSize()" [showCreate]="true" createText="Nuevo Usuario"
-        (create)="onCreate()" (edit)="onEdit($event)" (remove)="confirmDelete(deleteConfirmDialog, $event)"
-        (pageChange)="store.onPageChange($event)" (filterChange)="store.setFilter($event.key, $event.value)"
-        (clearFilters)="store.clearFilters()"></app-data-table>
-</div>
+<app-smart-table title="Usuarios" subtitle="Gestión de usuarios del sistema" [columns]="columns"
+    [data]="store.pagedItems()" [total]="store.totalItems()" [loading]="store.loading()" [pageIndex]="store.pageIndex()"
+    [pageSize]="store.pageSize()" [showCreate]="true" createText="Nuevo Usuario" (onAction)="onAction($event)"
+    (onPageChange)="store.onPageChange($event)" (onFilterChange)="store.setFilter($event.key, $event.value)"
+    (clearFilters)="store.clearFilters()">
+</app-smart-table>
 
 <ng-template #deleteConfirmDialog let-data>
     <h2 mat-dialog-title>Confirmar eliminación</h2>

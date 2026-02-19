@@ -1,12 +1,12 @@
-import { Component, computed, EventEmitter, input, Output, signal } from '@angular/core';
+import { Component, computed, EventEmitter, input, Output, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
-import { SettingsSectionId } from '../../pages/settings/settings.page.component'; // Ensure this type is exported or move it to a shared file later. For now, we might duplicate or import. 
-// Ideally, move types to a shared model file, but for speed, I'll redefine or import if it's exported.
-// It is exported `export type SettingsSectionId ...`
+import { MatDialog } from '@angular/material/dialog';
+import { UiAlertComponent, UiButtonComponent } from '@shared/ui';
+import { ConfigStore } from '../../../../core/stores/config.store';
 
 export type SettingsSectionIdLocal = 'appearance' | 'typography' | 'density' | 'tables' | 'buttons' | 'inputs';
 
@@ -26,12 +26,15 @@ interface SettingsNavItem {
         FormsModule,
         MatIconModule,
         MatListModule,
-        MatButtonModule
+        MatButtonModule,
+        UiButtonComponent
     ],
     templateUrl: './settings-sidebar.component.html',
 })
 export class SettingsSidebarComponent {
-    activeSection = input.required<string>(); // Keep as string or strict type
+    configStore = inject(ConfigStore);
+    private dialog = inject(MatDialog);
+    activeSection = input.required<string>();
     @Output() sectionChange = new EventEmitter<SettingsSectionIdLocal>();
 
     searchQuery = signal('');
@@ -81,9 +84,33 @@ export class SettingsSidebarComponent {
         this.sectionChange.emit(section as SettingsSectionIdLocal);
     }
 
-    reset() {
-        if (confirm('¿Restaurar toda la configuración a los valores por defecto?')) {
-            location.reload();
-        }
+    async reset() {
+        const dialogRef = this.dialog.open(UiAlertComponent, {
+            data: {
+                title: 'Restaurar Configuración',
+                message: '¿Estás seguro de que deseas restaurar toda la configuración a los valores por defecto? Esta acción no se puede deshacer.',
+                confirmText: 'Sí, restaurar',
+                cancelText: 'Cancelar',
+                type: 'danger'
+            }
+        });
+
+        dialogRef.afterClosed().subscribe(async (result) => {
+            if (result) {
+                try {
+                    await this.configStore.resetToDefaults();
+                } catch (error) {
+                    console.error('Error resetting config', error);
+                    this.dialog.open(UiAlertComponent, {
+                        data: {
+                            title: 'Error',
+                            message: 'Hubo un problema al restaurar la configuración. Por favor intenta de nuevo.',
+                            confirmText: 'Aceptar',
+                            type: 'danger'
+                        }
+                    });
+                }
+            }
+        });
     }
 }

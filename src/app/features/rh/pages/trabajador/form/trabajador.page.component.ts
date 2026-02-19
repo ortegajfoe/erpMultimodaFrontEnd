@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -17,9 +17,16 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TrabajadorService } from '../../../services/trabajador.service';
 import { DepartamentoService } from '../../../services/departamento.service';
 import { PuestoService } from '../../../services/puesto.service';
+import { NivelService } from '../../../services/nivel.service';
+import { TipoTrabajadorService } from '../../../services/tipo-trabajador.service';
 import { Departamento } from '../../../models/departamento.model';
 import { Puesto } from '../../../models/puesto.model';
+import { Nivel, TipoTrabajador } from '../../../models/rh-catalogos.model';
 import { FormLayoutComponent } from '../../../../../shared/components/layout/form-layout/form-layout.component';
+import { MxValidators } from '@shared/ui';
+import { SHARED_DIRECTIVES } from '../../../../../shared/directives';
+import { TrabajadorBancosComponent } from '../components/bancos/trabajador-bancos.component';
+import { TrabajadorDocumentosComponent } from '../components/documentos/trabajador-documentos.component';
 
 import { environment } from 'src/environments/environment';
 
@@ -40,7 +47,10 @@ import { environment } from 'src/environments/environment';
         MatTabsModule,
         MatSelectModule,
         MatProgressSpinnerModule,
-        FormLayoutComponent
+        FormLayoutComponent,
+        SHARED_DIRECTIVES,
+        TrabajadorBancosComponent,
+        TrabajadorDocumentosComponent
     ],
     templateUrl: './trabajador.page.component.html',
     styleUrls: ['./trabajador.page.component.scss']
@@ -53,9 +63,12 @@ export class TrabajadorCreatePageComponent implements OnInit {
     private trabajadorService = inject(TrabajadorService);
     private departamentoService = inject(DepartamentoService);
     private puestoService = inject(PuestoService);
+    private nivelService = inject(NivelService);
+    private tipoTrabajadorService = inject(TipoTrabajadorService);
     private snackBar = inject(MatSnackBar);
 
     loading = signal<boolean>(false);
+    id = signal<number | null>(null);
 
     selectedTabIndex = 0;
     isEditMode = false;
@@ -64,8 +77,10 @@ export class TrabajadorCreatePageComponent implements OnInit {
 
     apiUrl = environment.apiUrl;
 
-    departamentos: Departamento[] = [];
-    puestos: Puesto[] = [];
+    departamentos = signal<Departamento[]>([]);
+    puestos = signal<Puesto[]>([]);
+    niveles = signal<Nivel[]>([]);
+    tiposTrabajador = signal<TipoTrabajador[]>([]);
 
     form: FormGroup = this.fb.group({
         idTrabajador: [null],
@@ -73,8 +88,8 @@ export class TrabajadorCreatePageComponent implements OnInit {
         apPaterno: ['', Validators.required],
         apMaterno: [''],
         fechaNacimiento: [null, Validators.required],
-        rfc: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(13)]],
-        curp: ['', [Validators.maxLength(18)]],
+        rfc: ['', [Validators.required, Validators.maxLength(13), MxValidators.rfc]],
+        curp: ['', [Validators.required, MxValidators.curp, Validators.maxLength(18)]],
         direccion: ['', Validators.required],
         direccion2: [''],
         numExt: ['', Validators.required],
@@ -110,6 +125,7 @@ export class TrabajadorCreatePageComponent implements OnInit {
             if (params['id']) {
                 this.isEditMode = true;
                 this.workerId = +params['id'];
+                this.id.set(this.workerId);
                 this.pageTitle = 'Editar Trabajador';
                 this.loadWorker(this.workerId!);
             }
@@ -118,13 +134,23 @@ export class TrabajadorCreatePageComponent implements OnInit {
 
     loadCatalogos() {
         this.departamentoService.getAll(1).subscribe({
-            next: (data) => this.departamentos = data,
+            next: (data) => this.departamentos.set(data),
             error: (err) => console.error('Error cargando departamentos', err)
         });
 
         this.puestoService.getAll(1).subscribe({
-            next: (data) => this.puestos = data,
+            next: (data) => this.puestos.set(data),
             error: (err) => console.error('Error cargando puestos', err)
+        });
+
+        this.nivelService.getAll(1).subscribe({
+            next: (data) => this.niveles.set(data),
+            error: (err) => console.error('Error cargando niveles', err)
+        });
+
+        this.tipoTrabajadorService.getAll(1).subscribe({
+            next: (data) => this.tiposTrabajador.set(data),
+            error: (err) => console.error('Error cargando tipos de trabajador', err)
         });
     }
 
@@ -173,10 +199,26 @@ export class TrabajadorCreatePageComponent implements OnInit {
             }
         });
     }
+    @ViewChild(TrabajadorBancosComponent) bancosComponent!: TrabajadorBancosComponent;
+    @ViewChild(TrabajadorDocumentosComponent) documentosComponent!: TrabajadorDocumentosComponent;
+
     save() {
+        switch (this.selectedTabIndex) {
+            case 0:
+                this.saveWorker();
+                break;
+            case 1:
+                this.saveBanco();
+                break;
+            case 2:
+                this.saveDocumento();
+                break;
+        }
+    }
+
+    private saveWorker() {
         if (this.form.invalid) {
             this.form.markAllAsTouched();
-            this.detectErrorTab();
             return;
         }
 
@@ -221,26 +263,77 @@ export class TrabajadorCreatePageComponent implements OnInit {
 
         request$.subscribe({
             next: (res: any) => {
-                setTimeout(() => {
-                    this.loading.set(false);
-
-                    if (res.exito === 1 || res.status === 'success' || res.data) {
-                        const msg = this.isEditMode ? 'Trabajador actualizado correctamente' : 'Trabajador creado correctamente';
-                        this.snackBar.open(msg, 'Cerrar', { duration: 3000 });
+                this.loading.set(false);
+                if (res.exito === 1 || res.status === 'success' || res.data) {
+                    const msg = this.isEditMode ? 'Trabajador actualizado correctamente' : 'Trabajador creado correctamente';
+                    this.snackBar.open(msg, 'Cerrar', { duration: 3000 });
+                    if (!this.isEditMode) {
                         this.router.navigate(['/app/rh/trabajadores']);
-                    } else {
-                        this.snackBar.open(`Error: ${res.mensaje || 'Error desconocido'}`, 'Cerrar', { duration: 5000 });
                     }
-                }, 0);
+                } else {
+                    this.snackBar.open(`Error: ${res.mensaje || 'Error desconocido'}`, 'Cerrar', { duration: 5000 });
+                }
             },
             error: (err: any) => {
-                setTimeout(() => {
-                    this.loading.set(false);
-                    console.error(err);
-                    this.snackBar.open('Error de conexión al guardar', 'Cerrar', { duration: 5000 });
-                }, 0);
+                this.loading.set(false);
+                console.error(err);
+                this.snackBar.open('Error al guardar trabajador', 'Cerrar', { duration: 5000 });
             }
         });
+    }
+
+    private saveBanco() {
+        if (!this.bancosComponent || !this.bancosComponent.showForm()) {
+            return;
+        }
+
+        const request$ = this.bancosComponent.save();
+
+        if (request$) {
+            this.loading.set(true);
+            request$.subscribe({
+                next: (res: any) => {
+                    this.loading.set(false);
+                    if (res && (res.exito === 1 || res.status === 'success')) {
+                        this.snackBar.open('Cuenta guardada correctamente', 'Cerrar', { duration: 3000 });
+                    } else {
+                    }
+                },
+                error: (err: any) => {
+                    this.loading.set(false);
+                    console.error(err);
+                    this.snackBar.open('Error al guardar cuenta', 'Cerrar', { duration: 3000 });
+                }
+            });
+        } else {
+            this.snackBar.open('Formulario bancario inválido', 'Cerrar', { duration: 3000 });
+        }
+    }
+
+    private saveDocumento() {
+        if (!this.documentosComponent) return;
+
+        const request$ = this.documentosComponent.upload();
+
+        if (request$) {
+            this.loading.set(true);
+            request$.subscribe({
+                next: (res: any) => {
+                    this.loading.set(false);
+                    if (res && (res.exito === 1 || res.status === 'success')) {
+                        this.snackBar.open('Documento subido correctamente', 'Cerrar', { duration: 3000 });
+                    } else {
+                    }
+                },
+                error: (err: any) => {
+                    this.loading.set(false);
+                    console.error(err);
+                    this.snackBar.open('Error al subir documento', 'Cerrar', { duration: 3000 });
+                }
+            });
+        } else {
+            this.snackBar.open('Debe seleccionar un archivo válido', 'Cerrar', { duration: 3000 });
+        }
     }
 
     cancel() {

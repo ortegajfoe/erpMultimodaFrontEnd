@@ -1,19 +1,28 @@
-<div class="flex flex-col h-full bg-gray-50">
+<div class="flex flex-col h-full bg-gray-50 dark:bg-slate-950">
 
-    <div class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-10"
+    <div class="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-gray-800 px-6 py-0 flex items-center justify-between sticky top-0 z-10"
         *ngIf="title">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">{{title}}</h1>
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">{{title}}</h1>
         </div>
-        <button mat-flat-button color="primary" *ngIf="showCreate" (click)="create.emit()">
-            <mat-icon class="mr-2">add</mat-icon>
-            {{createText}}
-        </button>
+        <div class="flex items-center gap-2">
+            @if (!isMobile) {
+            <button mat-stroked-button (click)="toggleFilters()" [color]="showFilters ? 'primary' : ''">
+                <mat-icon class="mr-1">{{showFilters ? 'filter_list_off' : 'filter_list'}}</mat-icon>
+                {{showFilters ? 'Ocultar Filtros' : 'Filtros'}}
+            </button>
+            }
+            <button mat-flat-button color="primary" *ngIf="showCreate" (click)="create.emit()">
+                <mat-icon class="mr-2">add</mat-icon>
+                {{createText}}
+            </button>
+        </div>
     </div>
 
 
     <div class="flex-grow p-4 md:p-6 overflow-hidden flex flex-col">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full overflow-hidden relative">
+        <div
+            class="bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-800 flex flex-col h-full overflow-hidden relative">
 
 
             @if (error) {
@@ -69,7 +78,8 @@
                     @if (col.filter && col.filter !== 'none') {
                     <mat-form-field appearance="outline" class="w-full dense-form-field bg-white">
                         <mat-label>{{col.label}}</mat-label>
-                        <input matInput [formControlName]="getControlName(col)">
+                        <input matInput [formControlName]="getControlName(col)"
+                            [placeholder]="col.filterPlaceholder || col.label">
                     </mat-form-field>
                     }
                     }
@@ -80,11 +90,13 @@
 
 
             @if (!isMobile) {
-            <div class="flex-grow overflow-hidden relative flex flex-col table-container-wrapper">
+            <div
+                class="flex-grow overflow-hidden relative flex flex-col table-container-wrapper bg-white dark:bg-slate-900">
 
                 <div class="table-scroll flex-grow" [formGroup]="filterForm">
                     <table mat-table [dataSource]="rows" matSort (matSortChange)="onSort($event)"
-                        [matSortActive]="sortActive" [matSortDirection]="sortDirection" class="w-full">
+                        [matSortActive]="sortActive" [matSortDirection]="sortDirection" class="w-full"
+                        [class.table-zebra]="zebra">
 
                         @for (col of columns; track col.key) {
                         <ng-container [matColumnDef]="getControlName(col)">
@@ -106,7 +118,8 @@
                             <th mat-header-cell *matHeaderCellDef>
                                 @if (col.filter && col.filter !== 'none') {
                                 <mat-form-field appearance="outline" class="w-full dense-form-field filter-field">
-                                    <input matInput [formControlName]="getControlName(col)" placeholder="Filtrar">
+                                    <input matInput [formControlName]="getControlName(col)"
+                                        [placeholder]="col.filterPlaceholder || col.label">
                                 </mat-form-field>
                                 }
                             </th>
@@ -138,10 +151,11 @@
                         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
 
 
-                        <tr mat-header-row *matHeaderRowDef="filterColumns; sticky: true" class="filter-row"></tr>
+                        <tr mat-header-row *matHeaderRowDef="filterColumns; sticky: true" class="filter-row"
+                            [class.hidden]="!showFilters"></tr>
 
                         <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-                            class="hover:bg-gray-50 transition-colors"></tr>
+                            class="hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"></tr>
 
                         <tr class="mat-row" *matNoDataRow>
                             <td class="mat-cell p-8 text-center text-gray-500" [attr.colspan]="displayedColumns.length">
@@ -199,8 +213,8 @@
             }
 
             <mat-paginator [length]="total" [pageIndex]="pageIndex" [pageSize]="pageSize"
-                [pageSizeOptions]="[10, 25, 100]" aria-label="Seleccionar página"
-                (page)="onPage($event)"></mat-paginator>
+                [pageSizeOptions]="[10, 25, 100]" aria-label="Seleccionar página" (page)="onPage($event)"
+                class="bg-white dark:bg-slate-900 text-gray-800 dark:text-gray-200"></mat-paginator>
 
             }
 

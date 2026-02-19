@@ -2,7 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-// Components
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ConfigStore } from '../../../../core/stores/config.store';
 import { SettingsSidebarComponent, SettingsSectionIdLocal } from '../../components/settings-sidebar/settings-sidebar.component';
 import { SettingsPreviewComponent } from '../../components/settings-preview/settings-preview.component';
 import { AppearancePanelComponent } from '../../components/panels/appearance-panel/appearance-panel.component';
@@ -11,6 +12,9 @@ import { DensityPanelComponent } from '../../components/panels/density-panel/den
 import { ButtonsPanelComponent } from '../../components/panels/buttons-panel/buttons-panel.component';
 import { FormsPanelComponent } from '../../components/panels/forms-panel/forms-panel.component';
 import { TablesPanelComponent } from '../../components/panels/tables-panel/tables-panel.component';
+
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { UiButtonComponent } from '@shared/ui';
 
 export type SettingsSectionId = SettingsSectionIdLocal;
 
@@ -28,13 +32,16 @@ export type SettingsSectionId = SettingsSectionIdLocal;
         DensityPanelComponent,
         ButtonsPanelComponent,
         FormsPanelComponent,
-        TablesPanelComponent
+        TablesPanelComponent,
+        MatSnackBarModule,
+        UiButtonComponent
     ],
     templateUrl: './settings.page.component.html',
     styleUrls: ['./settings.page.component.scss']
 })
 export class SettingsPageComponent {
     activeSection = signal<SettingsSectionId>('appearance');
+    readonly configStore = inject(ConfigStore);
 
     getSectionTitle(): string {
         switch (this.activeSection()) {
@@ -60,7 +67,21 @@ export class SettingsPageComponent {
         }
     }
 
-    saveConfig() {
-        console.log('Settings are saved automatically.');
+    private snackBar = inject(MatSnackBar);
+
+    async saveChanges() {
+        try {
+            await this.configStore.saveConfig();
+            this.snackBar.open('Configuración guardada correctamente', 'Cerrar', {
+                duration: 3000,
+                panelClass: ['success-snackbar']
+            });
+        } catch (error) {
+            console.error('Error saving config', error);
+            this.snackBar.open('Error al guardar configuración', 'Cerrar', {
+                duration: 3000,
+                panelClass: ['error-snackbar']
+            });
+        }
     }
 }

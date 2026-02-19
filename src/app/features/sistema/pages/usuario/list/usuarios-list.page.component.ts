@@ -1,4 +1,4 @@
-import { Component, inject, TemplateRef } from '@angular/core';
+import { Component, inject, TemplateRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -6,7 +6,8 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { map } from 'rxjs/operators';
 import { createCatalogStore } from '../../../../../shared/stores/catalog-store';
-import { DataTableComponent, DataTableColumn } from '../../../../../shared/components/table/data-table/data-table.component';
+import { SmartTableComponent, TableAction } from '../../../../../shared/components/table';
+import { DataTableColumn } from '../../../../../shared/components/table/data-table/data-table.component';
 import { UsuarioService, Usuario } from '../../../services/usuario.service';
 
 @Component({
@@ -17,7 +18,7 @@ import { UsuarioService, Usuario } from '../../../services/usuario.service';
         MatDialogModule,
         MatSnackBarModule,
         MatButtonModule,
-        DataTableComponent
+        SmartTableComponent
     ],
     templateUrl: './usuarios-list.page.component.html',
     styleUrls: ['./usuarios-list.page.component.scss']
@@ -28,9 +29,6 @@ export class UsuariosListPageComponent {
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
 
-    // Initialize Store
-    // Note: Assuming API returns data in response.data. Based on trabajador.service it returns {exito:1, data: []}
-    // So we map r.data ?? []
     readonly store = createCatalogStore<Usuario>({
         source$: this.usuarioService.getAll().pipe(map(r => r.data ?? [])),
         idKey: 'idUsuario',
@@ -38,6 +36,11 @@ export class UsuariosListPageComponent {
             return Object.entries(query).every(([key, value]) => {
                 if (!value || value.trim() === '') return true;
                 const filterVal = value.toLowerCase();
+
+                if (key === 'global') {
+                    const usuario = (row.usuario || '').toLowerCase();
+                    return usuario.includes(filterVal);
+                }
 
                 const val = String((row as any)[key] ?? '').toLowerCase();
                 return val.includes(filterVal);
@@ -53,16 +56,28 @@ export class UsuariosListPageComponent {
         { key: 'idEmpresa', label: 'Empresa', filter: 'number', mobileHidden: true }
     ];
 
+    @ViewChild('deleteConfirmDialog') deleteConfirmDialog!: TemplateRef<any>;
+
+    onAction(event: TableAction<Usuario>) {
+        switch (event.action) {
+            case 'create':
+                this.onCreate();
+                break;
+            case 'edit':
+                if (event.row) this.onEdit(event.row);
+                break;
+            case 'delete':
+                if (event.row) this.confirmDelete(this.deleteConfirmDialog, event.row);
+                break;
+        }
+    }
+
     onCreate() {
         this.router.navigate(['/app/sistema/usuarios/nuevo']);
     }
 
     onEdit(usuario: Usuario) {
         this.router.navigate(['/app/sistema/usuarios', usuario.idUsuario, 'editar']);
-    }
-
-    onRemove(usuario: Usuario) {
-        // Trigger confirmation
     }
 
     confirmDelete(templateRef: TemplateRef<any>, usuario: Usuario) {
@@ -81,7 +96,7 @@ export class UsuariosListPageComponent {
         this.usuarioService.delete(id).subscribe({
             next: () => {
                 this.snackBar.open('Usuario eliminado correctamente', 'Cerrar', { duration: 3000 });
-                window.location.reload(); // Simple reload for now
+                window.location.reload();
             },
             error: (err) => {
                 console.error(err);

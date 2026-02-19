@@ -1,11 +1,8 @@
-<div class="page-container">
-    <app-data-table title="Empresas" subtitle="Catálogo de Empresas" [columns]="columns" [rows]="store.pagedItems()"
-        [total]="store.totalItems()" [loading]="store.loading()" [pageIndex]="store.pageIndex()"
-        [pageSize]="store.pageSize()" [showCreate]="true" createText="Nueva Empresa" (create)="onCreate()"
-        (edit)="onEdit($event)" (remove)="confirmDelete(deleteConfirmDialog, $event)"
-        (pageChange)="store.onPageChange($event)" (filterChange)="store.setFilter($event.key, $event.value)"
-        (clearFilters)="store.clearFilters()"></app-data-table>
-</div>
+<app-smart-table title="Empresas" subtitle="Catálogo de Empresas" [columns]="columns" [data]="store.pagedItems()"
+    [total]="store.totalItems()" [loading]="store.loading()" [pageIndex]="store.pageIndex()"
+    [pageSize]="store.pageSize()" [showCreate]="true" createText="Nueva Empresa" (onAction)="onAction($event)"
+    (onPageChange)="store.onPageChange($event)" (onFilterChange)="store.setFilter($event.key, $event.value)"
+    (clearFilters)="store.clearFilters()"></app-smart-table>
 
 <ng-template #deleteConfirmDialog let-data>
     <h2 mat-dialog-title>Confirmar eliminación</h2>

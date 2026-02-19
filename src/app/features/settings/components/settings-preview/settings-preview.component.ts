@@ -11,8 +11,10 @@ import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { ConfigStore } from '../../../../core/stores/config.store';
 import { ThemeService } from '../../../../core/services/theme.service';
-import { DataTableComponent, DataTableColumn } from '../../../../shared/components/table/data-table/data-table.component';
-import { ToolbarTableComponent } from '../../../../shared/components/table/toolbar-table/toolbar-table.component';
+import { SmartTableComponent } from '../../../../shared/components/table';
+import { DataTableColumn } from '../../../../shared/components/table/data-table/data-table.component';
+import { UiInputComponent } from '@shared/ui';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-settings-preview',
@@ -28,8 +30,9 @@ import { ToolbarTableComponent } from '../../../../shared/components/table/toolb
         MatTableModule,
         MatListModule,
         MatDividerModule,
-        DataTableComponent,
-        ToolbarTableComponent
+        SmartTableComponent,
+        UiInputComponent,
+        ReactiveFormsModule
     ],
     templateUrl: './settings-preview.component.html'
 })
@@ -39,10 +42,12 @@ export class SettingsPreviewComponent {
     private configStore = inject(ConfigStore);
     themeService = inject(ThemeService);
 
+    usuarioControl = new FormControl('');
+
     previewTableData: { id: number; name: string; status: string; budget: string; }[] = [
-        { id: 1, name: 'Proyecto Alpha', status: 'Activo', budget: '$12,000' },
-        { id: 2, name: 'Campaña Q3', status: 'Pendiente', budget: '$5,500' },
-        { id: 3, name: 'Mantenimiento', status: 'Finalizado', budget: '$2,000' },
+        { id: 1, name: 'Primer dato', status: 'Activo', budget: '$12,000' },
+        { id: 2, name: 'Segundo dato', status: 'Pendiente', budget: '$5,500' },
+        { id: 3, name: 'Tercer dato', status: 'Finalizado', budget: '$2,000' },
     ];
 
     previewColumns: DataTableColumn<{ id: number; name: string; status: string; budget: string; }>[] = [

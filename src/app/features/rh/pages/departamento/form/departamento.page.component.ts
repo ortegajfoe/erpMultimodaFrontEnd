@@ -10,6 +10,10 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { DepartamentoService } from '../../../services/departamento.service';
 import { Departamento } from '../../../models/departamento.model';
 
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormLayoutComponent } from '../../../../../shared/components/layout/form-layout/form-layout.component';
+import { UpperCaseInputDirective } from '@shared/ui';
+
 @Component({
     selector: 'app-departamento-page',
     standalone: true,
@@ -20,7 +24,11 @@ import { Departamento } from '../../../models/departamento.model';
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
-        MatSnackBarModule
+        MatIconModule,
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
+        FormLayoutComponent,
+        UpperCaseInputDirective
     ],
     templateUrl: './departamento.page.component.html',
     styleUrls: ['./departamento.page.component.scss']

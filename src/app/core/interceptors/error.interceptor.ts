@@ -10,7 +10,6 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
         catchError((error: HttpErrorResponse) => {
             let errorMessage = 'Ocurrió un error inesperado.';
 
-            // Prioritize error messages based on status code
             switch (error.status) {
                 case 0:
                     errorMessage = 'No hay conexión con el servidor';

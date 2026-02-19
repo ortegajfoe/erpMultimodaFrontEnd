@@ -1,6 +1,6 @@
 import { Component, computed, effect, inject, signal, ViewChild, AfterViewInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AsyncPipe } from '@angular/common'; // Still needed for other things? No, signals replace async pipe for this.
+import { AsyncPipe } from '@angular/common';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { map } from 'rxjs/operators';
 import { MatSidenav, MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav';
@@ -21,46 +21,38 @@ export class ShellLayoutComponent implements AfterViewInit {
   @ViewChild('sidenav') sidenav!: MatSidenav;
   @ViewChild('drawerContainer') drawerContainer!: MatSidenavContainer;
 
-  // 1. Reactive State Sources
   private isMobileSignal = toSignal(
     this.breakpointObserver.observe(Breakpoints.Handset).pipe(map(result => result.matches)),
     { initialValue: false }
   );
 
-  // Writable signals for manual state
-  // Desktop state: collapsed vs expanded
   isCollapsed = signal(false);
-  // Mobile state: open vs closed (drawer)
   mobileIsOpen = signal(false);
-  // Active group id
   openGroupId = signal<string | null>(null);
 
-  // 2. Computed State
   isMobile = computed(() => this.isMobileSignal());
 
   sidenavMode = computed(() => this.isMobile() ? 'over' : 'side');
 
   sidenavWidth = computed(() => {
     if (this.isMobile()) {
-      return 256; // Standard mobile drawer width
+      return 256;
     }
-    return this.isCollapsed() ? 72 : 256; // Desktop: Rail (72) vs Expanded (256)
+    return this.isCollapsed() ? 72 : 256;
   });
 
   isSidenavOpen = computed(() => {
     if (this.isMobile()) {
       return this.mobileIsOpen();
     }
-    return true; // Always open in desktop (side mode)
+    return true;
   });
 
   constructor() {
     effect(() => {
-      // Trigger effect when width or mode changes
       const width = this.sidenavWidth();
       const mode = this.sidenavMode();
 
-      // Update content margins only in desktop mode
       if (!this.isMobile()) {
         this.scheduleMarginUpdate();
       }
@@ -73,14 +65,11 @@ export class ShellLayoutComponent implements AfterViewInit {
 
   private scheduleMarginUpdate() {
     if (this.drawerContainer) {
-      // Update immediately (next frame)
       requestAnimationFrame(() => this.drawerContainer.updateContentMargins());
-      // Update after transition (300ms + buffer)
       setTimeout(() => this.drawerContainer.updateContentMargins(), 330);
     }
   }
 
-  // 3. Actions
   toggleSidenav() {
     if (this.isMobile()) {
       this.mobileIsOpen.update(v => !v);

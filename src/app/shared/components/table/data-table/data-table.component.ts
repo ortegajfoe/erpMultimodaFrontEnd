@@ -10,7 +10,8 @@ import {
     SimpleChanges,
     ViewChild,
     inject,
-    TemplateRef
+    TemplateRef,
+    ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ErrorStateComponent } from '../../feedback/error-state/error-state.component';
@@ -36,6 +37,7 @@ export interface DataTableColumn<T> {
     mobileHidden?: boolean;
     chip?: boolean;
     valueFn?: (row: T) => string;
+    filterPlaceholder?: string;
 }
 
 @Component({
@@ -65,7 +67,6 @@ export class DataTableComponent<T> implements OnChanges, OnDestroy {
     @Input() showCreate = false;
     @Input() createText = 'Nuevo';
 
-    // Data Inputs
     @Input() rows: T[] = [];
     @Input() total = 0;
     @Input() loading = false;
@@ -74,11 +75,10 @@ export class DataTableComponent<T> implements OnChanges, OnDestroy {
     @Input() sortActive = '';
     @Input() sortDirection: 'asc' | 'desc' | '' = '';
     @Input() error: string | null = null;
+    @Input() zebra = false;
 
-    // Internal state
     skeletonRows = Array(5).fill(0);
 
-    // Events
     @Output() create = new EventEmitter<void>();
     @Output() edit = new EventEmitter<T>();
     @Output() remove = new EventEmitter<T>();
@@ -89,12 +89,14 @@ export class DataTableComponent<T> implements OnChanges, OnDestroy {
     @Output() retry = new EventEmitter<void>();
 
     private breakpointObserver = inject(BreakpointObserver);
+    private cdr = inject(ChangeDetectorRef);
     private destroy$ = new Subject<void>();
 
     filterForm = new FormGroup({});
     displayedColumns: string[] = [];
     filterColumns: string[] = [];
     isMobile = false;
+    showFilters = false;
     showMobileFilters = false;
 
     constructor() {
@@ -130,7 +132,6 @@ export class DataTableComponent<T> implements OnChanges, OnDestroy {
         this.filterForm.valueChanges
             .pipe(debounceTime(300), takeUntil(this.destroy$))
             .subscribe((values: any) => {
-                // Emit the entire form value for the parent to handle.
                 Object.keys(values).forEach(key => {
                     this.filterChange.emit({ key, value: values[key] });
                 });
@@ -179,5 +180,11 @@ export class DataTableComponent<T> implements OnChanges, OnDestroy {
 
     trackById(index: number, item: any): any {
         return item.id || item.idTrabajador || item.idDepartamento || item.idPuesto || index;
+    }
+
+    toggleFilters() {
+        this.showFilters = !this.showFilters;
+        console.log('Toggle Filters:', this.showFilters, 'Filter Columns:', this.filterColumns.length);
+        this.cdr.detectChanges();
     }
 }

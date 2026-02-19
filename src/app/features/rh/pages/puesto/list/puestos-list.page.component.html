@@ -1,9 +1,9 @@
-<app-data-table title="Puestos" subtitle="Gestión de puestos y cargos" [rows]="store.pagedItems()" [columns]="columns"
+<app-smart-table title="Puestos" subtitle="Gestión de puestos y cargos" [data]="store.pagedItems()" [columns]="columns"
     [total]="store.totalItems()" [pageIndex]="store.pageIndex()" [pageSize]="store.pageSize()"
-    [loading]="store.loading()" [showCreate]="true" createText="Nuevo Puesto" (create)="onCreate()"
-    (edit)="onEdit($event)" (remove)="confirmDelete(deleteDialog, $event)" (pageChange)="store.onPageChange($event)"
-    (filterChange)="store.setFilter($event.key, $event.value)" (clearFilters)="store.clearFilters()">
-</app-data-table>
+    [loading]="store.loading()" [showCreate]="true" createText="Nuevo Puesto" (onAction)="onAction($event)"
+    (onPageChange)="store.onPageChange($event)" (onFilterChange)="store.setFilter($event.key, $event.value)"
+    (clearFilters)="store.clearFilters()">
+</app-smart-table>
 
 
 <ng-template #deleteDialog let-data>

@@ -1,28 +1,31 @@
-<mat-card class="p-0 overflow-hidden border border-gray-200 shadow-sm">
-    <div class="p-4 border-b bg-gray-50 font-medium text-gray-700">Esquema de Color</div>
+<mat-card class="p-0 overflow-hidden border border-gray-200 dark:border-gray-700 shadow-sm bg-white dark:bg-slate-900">
+    <div
+        class="p-4 border-b bg-gray-50 dark:bg-slate-800/50 font-medium text-gray-700 dark:text-white border-gray-200 dark:border-gray-700">
+        Esquema de Color</div>
     <div class="p-6 flex flex-col gap-6">
         <div class="flex items-center justify-between">
             <div>
-                <h4 class="font-medium text-gray-900">Color Principal</h4>
-                <p class="text-xs text-gray-500">Color de marca para acciones principales.</p>
+                <h4 class="font-medium text-gray-900 dark:text-white">Color Principal</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Color de marca para acciones principales.</p>
             </div>
             <div class="flex items-center gap-3">
                 <span class="text-xs font-mono text-gray-500">{{ themeService.settings().primaryColor
                     }}</span>
                 <input type="color" [ngModel]="themeService.settings().primaryColor"
                     (ngModelChange)="updatePrimaryColor($event)"
-                    class="h-10 w-10 cursor-pointer rounded-lg border-2 border-gray-200 p-1">
+                    class="h-10 w-10 cursor-pointer rounded-lg border-2 border-gray-200 dark:border-gray-600 p-1 bg-white dark:bg-slate-700">
             </div>
         </div>
         <mat-divider></mat-divider>
         <div class="flex items-center justify-between">
             <div>
-                <h4 class="font-medium text-gray-900">Modo Oscuro</h4>
-                <p class="text-xs text-gray-500">Interfaz optimizada para baja luminosidad.</p>
+                <h4 class="font-medium text-gray-900 dark:text-white">Modo Oscuro</h4>
+                <p class="text-xs text-gray-500 dark:text-gray-400">Interfaz optimizada para baja luminosidad.</p>
             </div>
             <mat-slide-toggle [ngModel]="themeService.settings().mode === 'dark'" (ngModelChange)="updateMode($event)"
                 color="primary">
             </mat-slide-toggle>
         </div>
     </div>
+
 </mat-card>

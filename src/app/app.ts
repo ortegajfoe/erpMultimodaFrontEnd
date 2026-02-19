@@ -11,4 +11,8 @@ import { ThemeService } from './core/services/theme.service';
 })
 export class App {
   private themeService = inject(ThemeService);
+
+  constructor() {
+    this.themeService.init();
+  }
 }

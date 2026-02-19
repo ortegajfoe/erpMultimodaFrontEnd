@@ -1,0 +1,24 @@
+<div class="p-6 max-w-md mx-auto bg-white rounded-xl">
+    <div class="flex items-start gap-4">
+        <div [class]="'p-3 rounded-full flex-shrink-0 ' + iconColorClass">
+            <mat-icon class="material-icons-outlined text-2xl">{{ iconName }}</mat-icon>
+        </div>
+
+        <div class="flex-grow">
+            <h2 class="text-lg font-semibold text-gray-900 mb-1">{{ data.title }}</h2>
+            <p class="text-sm text-gray-500 mb-6 leading-relaxed">{{ data.message }}</p>
+
+            <div class="flex justify-end gap-3">
+                @if (data.cancelText) {
+                <ui-button variant="secondary" (onClick)="cancel()">
+                    {{ data.cancelText }}
+                </ui-button>
+                }
+
+                <ui-button [variant]="data.type === 'danger' ? 'danger' : 'primary'" (onClick)="confirm()">
+                    {{ data.confirmText || 'Confirmar' }}
+                </ui-button>
+            </div>
+        </div>
+    </div>
+</div>

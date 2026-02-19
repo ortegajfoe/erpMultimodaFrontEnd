@@ -6,28 +6,34 @@
     background-color: white;
 }
 
-// Navigation Item - Base Style
 .nav-item {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border-radius: 8px; // Inner radius for pills
-    color: #475569; // Slate 600
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: #475569;
     transition: all 0.2s ease-in-out;
     text-decoration: none;
     margin-bottom: 2px;
     cursor: pointer;
     min-height: 44px;
 
-    // Hover State
     &:hover {
-        background-color: #f1f5f9; // Slate 100
-        color: #1e293b; // Slate 800
+        background-color: #f1f5f9;
+        color: #1e293b;
     }
 
-    // Centered alignment for collapsed mode logic is handled by flex & hiding text
-    // But we need to ensure icon centers
+    :host-context(.dark) & {
+        color: #94a3b8;
+
+        &:hover {
+            background-color: #1e293b;
+            color: #f1f5f9;
+        }
+    }
+
     &[matTooltip] {
         justify-content: center;
     }
@@ -45,14 +51,13 @@
 }
 
 .nav-text {
-    font-size: 0.875rem; // 14px
+    font-size: 0.875rem;
     font-weight: 500;
     white-space: nowrap;
     opacity: 1;
     transition: opacity 0.2s;
 }
 
-// Active State - The "Pill"
 .active-pill {
     background-color: var(--primary-muted) !important;
     color: var(--primary-color) !important;
@@ -63,7 +68,6 @@
         color: var(--primary-color) !important;
     }
 
-    // Left indicator (Optional, requested in prompt)
     &::before {
         content: '';
         position: absolute;
@@ -75,11 +79,10 @@
         background-color: var(--primary-color);
         border-top-right-radius: 3px;
         border-bottom-right-radius: 3px;
-        display: block; // Visible active indicator
+        display: block;
     }
 }
 
-// Scrollbar refinement
 .custom-scrollbar {
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 transparent;
@@ -97,7 +100,3 @@
         border-radius: 20px;
     }
 }
-
-// Collapsed Overrides 
-// When collapsed, the parent container shrinks, so we trust flexbox instructions in HTML
-// but we ensure text is strictly hidden there (ngIf).

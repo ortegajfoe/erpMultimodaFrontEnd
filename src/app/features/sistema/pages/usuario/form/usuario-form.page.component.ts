@@ -11,10 +11,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { UsuarioService } from '../../../services/usuario.service';
 import { EmpresaService } from '../../../services/empresa.service';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { FormLayoutComponent } from '../../../../../shared/components/layout/form-layout/form-layout.component';
+import { UpperCaseInputDirective } from '@shared/ui';
 
 @Component({
     selector: 'app-usuario-form',
-    // ... imports remain the same
     standalone: true,
     imports: [
         CommonModule,
@@ -25,7 +27,10 @@ import { EmpresaService } from '../../../services/empresa.service';
         MatSelectModule,
         MatCardModule,
         MatIconModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatProgressSpinnerModule,
+        FormLayoutComponent,
+        UpperCaseInputDirective
     ],
     templateUrl: './usuario-form.page.component.html',
     styleUrls: ['./usuario-form.page.component.scss']
@@ -43,10 +48,9 @@ export class UsuarioFormPageComponent implements OnInit {
     usuarioId: number | null = null;
     hidePassword = signal(true);
 
-    // Mocks for dropdowns as requested
     roles = [{ id: 1, nombre: 'Admin' }, { id: 2, nombre: 'Usuario' }];
     trabajadores = [{ id: 1, nombre: 'Juan Perez' }, { id: 2, nombre: 'Maria Lopez' }];
-    empresas: any[] = []; // Array to hold companies
+    empresas: any[] = [];
 
     form = this.fb.group({
         usuario: ['', Validators.required],
@@ -54,7 +58,7 @@ export class UsuarioFormPageComponent implements OnInit {
         notas: [''],
         idRol: [1, Validators.required],
         idTrabajador: [1, Validators.required],
-        idEmpresa: [null as number | null, Validators.required] // Required now
+        idEmpresa: [null as number | null, Validators.required]
     });
 
     ngOnInit() {
@@ -66,7 +70,6 @@ export class UsuarioFormPageComponent implements OnInit {
                 this.usuarioId = +params['id'];
                 this.loadUsuario(this.usuarioId);
             } else {
-                // New User: Password required
                 this.form.controls.passw.setValidators([Validators.required]);
                 this.form.controls.passw.updateValueAndValidity();
             }
@@ -116,15 +119,10 @@ export class UsuarioFormPageComponent implements OnInit {
         this.isLoading.set(true);
         const formData: any = this.form.value;
 
-        // Adjust payload: userAlta/userMod will be handled by backend from token ideally,
-        // but service expects them in body if not handled.
-        // Controller we wrote uses req.user or body.
-        // We will send basic data.
-
         const payload = {
             ...formData,
-            userAlta: 1, // Fallback
-            userMod: 1   // Fallback
+            userAlta: 1,
+            userMod: 1
         };
 
         if (this.isEditing()) {
@@ -152,6 +150,14 @@ export class UsuarioFormPageComponent implements OnInit {
                 }
             });
         }
+    }
+
+    save() {
+        this.onSubmit();
+    }
+
+    cancel() {
+        this.onCancel();
     }
 
     onCancel() {
