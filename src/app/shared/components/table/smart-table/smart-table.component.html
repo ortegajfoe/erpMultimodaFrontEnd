@@ -1,18 +1,18 @@
 @switch (layout()) {
 @case ('toolbar') {
 <app-toolbar-table [data]="data" [columns]="columns" [total]="total" [pageSize]="pageSize" [loading]="loading"
-    [zebra]="zebra()" (create)="handleCreate()" (edit)="handleEdit($event)" (remove)="handleRemove($event)"
-    (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
-    (filterChange)="handleToolbarFilter($event)">
+    [zebra]="zebra()" [customActions]="customActions" (create)="handleCreate()" (edit)="handleEdit($event)"
+    (remove)="handleRemove($event)" (customAction)="handleCustomAction($event)" (pageChange)="handlePageChange($event)"
+    (sortChange)="handleSortChange($event)" (filterChange)="handleToolbarFilter($event)">
 </app-toolbar-table>
 }
 @default {
 <app-data-table [rows]="data" [columns]="columns" [total]="total" [loading]="loading" [pageIndex]="pageIndex"
     [pageSize]="pageSize" [title]="title" [subtitle]="subtitle" [showCreate]="showCreate" [createText]="createText"
     [sortActive]="sortActive" [sortDirection]="sortDirection" [error]="error" [zebra]="zebra()"
-    (create)="handleCreate()" (edit)="handleEdit($event)" (remove)="handleRemove($event)"
-    (pageChange)="handlePageChange($event)" (sortChange)="handleSortChange($event)"
-    (filterChange)="handleFilterChange($event)">
+    [customActions]="customActions" (create)="handleCreate()" (edit)="handleEdit($event)"
+    (remove)="handleRemove($event)" (customAction)="handleCustomAction($event)" (pageChange)="handlePageChange($event)"
+    (sortChange)="handleSortChange($event)" (filterChange)="handleFilterChange($event)">
 </app-data-table>
 }
 }

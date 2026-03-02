@@ -58,49 +58,9 @@
         </form>
     </div>
 
-    <div class="overflow-x-auto rounded-lg border border-gray-200">
-        <table mat-table [dataSource]="documentos()" class="w-full">
-            <ng-container matColumnDef="tipo">
-                <th mat-header-cell *matHeaderCellDef> Tipo Documento </th>
-                <td mat-cell *matCellDef="let element" class="font-medium"> {{element.documento}} </td>
-            </ng-container>
-
-
-            <ng-container matColumnDef="nombreArchivo">
-                <th mat-header-cell *matHeaderCellDef> Archivo </th>
-                <td mat-cell *matCellDef="let element"> {{element.nombreArchivo || 'Ver Archivo'}} </td>
-            </ng-container>
-
-            <ng-container matColumnDef="fechaVence">
-                <th mat-header-cell *matHeaderCellDef> Vencimiento </th>
-                <td mat-cell *matCellDef="let element" [ngClass]="getExpirationStatus(element.fechaVence)">
-                    {{element.fechaVence | date:'mediumDate'}}
-                    <span *ngIf="getExpirationStatus(element.fechaVence) === 'expired'"
-                        class="text-xs ml-1">(Vencido)</span>
-                </td>
-            </ng-container>
-            <ng-container matColumnDef="acciones">
-                <th mat-header-cell *matHeaderCellDef> Acciones </th>
-                <td mat-cell *matCellDef="let element">
-                    <a mat-icon-button color="accent" [href]="'#'" target="_blank" matTooltip="Descargar/Ver">
-                        <mat-icon>visibility</mat-icon>
-                    </a>
-                    <button mat-icon-button color="warn" (click)="delete(element)" matTooltip="Eliminar">
-                        <mat-icon>delete</mat-icon>
-                    </button>
-                </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-            <tr class="mat-row" *matNoDataRow>
-                <td class="mat-cell" colspan="4">
-                    <div class="p-6 text-center text-gray-500">
-                        No hay documentos registrados
-                    </div>
-                </td>
-            </tr>
-        </table>
+    <div class="mt-6">
+        <app-smart-table [data]="documentos()" [columns]="columns" [total]="documentos().length" [pageSize]="10"
+            [loading]="loading()" [customActions]="customActions" (onAction)="onAction($event)">
+        </app-smart-table>
     </div>
 </div>

@@ -7,6 +7,7 @@ import { DataTableComponent } from '../data-table/data-table.component';
 import { ToolbarTableComponent } from '../toolbar-table/toolbar-table.component';
 import { TableAction } from './smart-table.model';
 import { DataTableColumn } from '../../table/data-table/data-table.component';
+import { TableCustomAction } from '../../../models/data-table.model';
 
 @Component({
     selector: 'app-smart-table',
@@ -43,6 +44,8 @@ export class SmartTableComponent<T> {
     @Output() onSortChange = new EventEmitter<Sort>();
     @Output() onFilterChange = new EventEmitter<{ key: string, value: string }>();
 
+    @Input() customActions: TableCustomAction[] = [];
+
     layout = computed(() => this.configStore.settings().tableLayout);
     zebra = computed(() => this.configStore.settings().tableZebra);
 
@@ -56,6 +59,10 @@ export class SmartTableComponent<T> {
 
     handleRemove(row: T) {
         this.onAction.emit({ action: 'delete', row });
+    }
+
+    handleCustomAction(event: { action: string; row: T }) {
+        this.onAction.emit({ action: event.action, row: event.row });
     }
 
     handlePageChange(event: PageEvent) {

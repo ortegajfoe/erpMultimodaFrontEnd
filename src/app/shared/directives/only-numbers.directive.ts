@@ -1,36 +1,58 @@
-import { Directive, ElementRef, HostListener, Input } from '@angular/core';
+import { Directive, ElementRef, HostListener, Input, forwardRef } from '@angular/core';
+import { NG_VALIDATORS, Validator, AbstractControl, ValidationErrors } from '@angular/forms';
 
 @Directive({
     selector: '[appOnlyNumbers]',
-    standalone: true
+    standalone: true,
+    providers: [
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => OnlyNumbersDirective),
+            multi: true
+        }
+    ]
 })
-export class OnlyNumbersDirective {
+export class OnlyNumbersDirective implements Validator {
     @Input() maxLen: number | null = null;
 
     constructor(private el: ElementRef) { }
 
+    validate(control: AbstractControl): ValidationErrors | null {
+        const valor = control.value;
+        if (!valor) return null;
+        const strValor = String(valor);
+
+        if (strValor.length < 4) return null;
+
+        if (/^(.)\1+$/.test(strValor)) {
+            return { numerosInvalidos: 'No se permiten números idénticos repetidos' };
+        }
+        const secuenciaAscendente = '01234567890123456789';
+        const secuenciaDescendente = '98765432109876543210';
+
+        if (secuenciaAscendente.includes(strValor) || secuenciaDescendente.includes(strValor)) {
+            return { numerosInvalidos: 'No se permiten secuencias consecutivas' };
+        }
+
+        return null;
+    }
     @HostListener('keydown', ['$event'])
     onKeyDown(event: KeyboardEvent) {
         if (['Backspace', 'Tab', 'End', 'Home', 'ArrowLeft', 'ArrowRight', 'Delete', 'Enter'].indexOf(event.key) !== -1) {
             return;
         }
 
-        // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
         if ((event.ctrlKey || event.metaKey) && ['a', 'c', 'v', 'x'].indexOf(event.key.toLowerCase()) !== -1) {
             return;
         }
 
-        // Check if the key is a number
         if (!/^[0-9]$/.test(event.key)) {
             event.preventDefault();
             return;
         }
 
-        // Check max length if defined (and text is not selected)
         if (this.maxLen !== null) {
             const current: string = this.el.nativeElement.value;
-            // If we are at max length and not selecting text to replace, prevent input
-            // Selection check is basic here, more robust would check selectionStart/End
             const selectionStart = this.el.nativeElement.selectionStart;
             const selectionEnd = this.el.nativeElement.selectionEnd;
 
@@ -49,7 +71,6 @@ export class OnlyNumbersDirective {
 
         const pastedText = clipboardData.getData('text/plain');
 
-        // Remove non-numeric characters
         let numericText = pastedText.replace(/[^0-9]/g, '');
 
         if (!numericText) return;
@@ -58,24 +79,19 @@ export class OnlyNumbersDirective {
         const selectionStart = this.el.nativeElement.selectionStart || 0;
         const selectionEnd = this.el.nativeElement.selectionEnd || 0;
 
-        // Calculate available space
-        // If text is selected, it will be replaced, so we count current length minus selected length
         const currentLength = current.length - (selectionEnd - selectionStart);
 
         if (this.maxLen !== null) {
             const availableSpace = this.maxLen - currentLength;
             if (availableSpace <= 0) return;
 
-            // Truncate if needed
             numericText = numericText.substring(0, availableSpace);
         }
 
-        // Insert text at cursor position
         const newValue = current.substring(0, selectionStart) + numericText + current.substring(selectionEnd);
 
         this.el.nativeElement.value = newValue;
 
-        // Dispatch input event for Angular forms to pick up change
         this.el.nativeElement.dispatchEvent(new Event('input'));
     }
 }

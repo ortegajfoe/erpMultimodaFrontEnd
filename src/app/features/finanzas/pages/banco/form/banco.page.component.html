@@ -1,0 +1,32 @@
+<app-form-layout [title]="pageTitle" moduleName="Finanzas" subtitle="Gestión de instituciones financieras"
+    [loading]="loading()" [isValid]="true" (onSave)="save()" (onCancel)="cancel()">
+
+    <ng-template #formContent>
+        <form [formGroup]="form" class="space-y-4">
+
+            <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
+                <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
+                    <mat-icon class="text-blue-500 scale-90">account_balance</mat-icon>
+                    Datos del Banco
+                </h3>
+
+                <div class="grid grid-cols-12 gap-3">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
+                        <mat-label>Nombre del Banco</mat-label>
+                        <input matInput formControlName="banco" placeholder="Ingrese el nombre del banco" appUpperCase>
+                        <mat-error>Requerido</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="col-span-12">
+                        <mat-label>Notas</mat-label>
+                        <textarea matInput formControlName="notas" rows="3" appUpperCase></textarea>
+                    </mat-form-field>
+                </div>
+            </div>
+
+        </form>
+    </ng-template>
+
+    <ng-container *ngTemplateOutlet="formContent"></ng-container>
+
+</app-form-layout>

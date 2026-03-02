@@ -13,11 +13,16 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatTableModule } from '@angular/material/table';
 
 import { SHARED_DIRECTIVES } from '../../../../../../shared/directives';
 import { DocumentoTrabajadorService } from '../../../../services/documento-trabajador.service';
 import { DocumentoTrabajador, TipoDocumento } from '../../../../models/rh-auxiliares.model';
+import { SmartTableComponent, TableAction } from '../../../../../../shared/components/table';
+import { DataTableColumn } from '../../../../../../shared/models/data-table.model';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { VisorDocumentoDialogComponent, VisorDocumentoDialogData } from '../../../../../../shared/components/dialogs/visor-documento-dialog/visor-documento-dialog.component';
+import { TableCustomAction } from '../../../../../../shared/models/data-table.model';
+import { environment } from '@env/environment';
 
 @Component({
     selector: 'app-trabajador-documentos',
@@ -34,9 +39,10 @@ import { DocumentoTrabajador, TipoDocumento } from '../../../../models/rh-auxili
         MatDatepickerModule,
         MatNativeDateModule,
         MatTooltipModule,
-        MatTableModule,
         DatePipe,
-        SHARED_DIRECTIVES
+        SHARED_DIRECTIVES,
+        SmartTableComponent,
+        MatDialogModule
     ],
     templateUrl: './trabajador-documentos.component.html',
     styles: [`
@@ -59,6 +65,7 @@ export class TrabajadorDocumentosComponent {
     private documentoService = inject(DocumentoTrabajadorService);
     private fb = inject(FormBuilder);
     private snackBar = inject(MatSnackBar);
+    private dialog = inject(MatDialog);
 
     @ViewChild('fileInput') fileInput!: ElementRef;
 
@@ -67,7 +74,38 @@ export class TrabajadorDocumentosComponent {
     selectedFile: File | null = null;
     loading = signal<boolean>(false);
 
-    displayedColumns: string[] = ['tipo', 'nombreArchivo', 'fechaVence', 'acciones'];
+    columns: DataTableColumn<DocumentoTrabajador>[] = [
+        {
+            key: 'idDocumentoTrabajador',
+            label: 'Tipo Documento',
+            filter: 'text',
+            mobilePrimary: true,
+            valueFn: (row) => this.getNombreTipoDocumento(row.idTipoDocumento || 0)
+        },
+        {
+            key: 'nombreArchivo',
+            label: 'Archivo',
+            filter: 'text',
+            mobilePrimary: true,
+            valueFn: (row) => row.nombreArchivo || 'Ver Archivo'
+        },
+        {
+            key: 'fechaVence',
+            label: 'Vencimiento',
+            filter: 'text',
+            mobilePrimary: true,
+            valueFn: (row) => {
+                const datePipe = new DatePipe('en-US');
+                const text = datePipe.transform(row.fechaVence, 'mediumDate') || '';
+                return this.getExpirationStatus(row.fechaVence) === 'expired' ? `${text} (Vencido)` : text;
+            }
+        }
+    ];
+
+    customActions: TableCustomAction[] = [
+        { action: 'ver-pdf', icon: 'visibility', tooltip: 'Ver Documento', color: 'accent' },
+        { action: 'delete', icon: 'delete', tooltip: 'Eliminar', color: 'warn' }
+    ];
 
     form: FormGroup = this.fb.group({
         idTipoDocumento: [null, Validators.required],
@@ -89,7 +127,12 @@ export class TrabajadorDocumentosComponent {
     }
 
     loadDocumentos(id: number) {
-        this.documentoService.getByTrabajador(id).subscribe({
+        const data = {
+            idTrabajador: id,
+            tipoVinculo: 'trabajador',
+            idDocumentoTrabajador: 0
+        };
+        this.documentoService.getByTrabajador(data).subscribe({
             next: (data) => this.documentos.set(data),
             error: (err) => console.error('Error cargando documentos', err)
         });
@@ -97,7 +140,7 @@ export class TrabajadorDocumentosComponent {
 
     loadTiposDocumento() {
         this.documentoService.getTiposDocumento().subscribe({
-            next: (data) => this.tiposDocumento.set(data)
+            next: (data) => { this.tiposDocumento.set(data); console.log(data); }
         });
     }
 
@@ -134,9 +177,8 @@ export class TrabajadorDocumentosComponent {
             formData.append('notas', formValue.notas);
         }
 
-        formData.append('idEmpresa', '1');
-        formData.append('userAlta', '1');
-
+        formData.append('tipoVinculo', 'trabajador');
+        formData.append('contentType', this.selectedFile.type || '');
 
         return this.documentoService.upload(formData).pipe(
             tap((res) => {
@@ -166,6 +208,30 @@ export class TrabajadorDocumentosComponent {
                 }
             });
         }
+    }
+
+    onAction(event: TableAction<DocumentoTrabajador>) {
+        debugger
+        if (event.action === 'delete' && event.row) {
+            this.delete(event.row);
+        } else if (event.action === 'edit' && event.row) {
+        } else if (event.action === 'ver-pdf' && event.row) {
+            this.verDocumento(event.row);
+        }
+    }
+
+    verDocumento(doc: DocumentoTrabajador) {
+        const apiUrl = `${environment.apiUrl}/api/rh/documentoTrabajador/${doc.idDocumentoTrabajador}/ver`;
+        this.dialog.open(VisorDocumentoDialogComponent, {
+            data: {
+                url: apiUrl,
+                nombre: this.getNombreTipoDocumento(doc.idTipoDocumento || 0)
+            } as VisorDocumentoDialogData,
+            width: '90vw',
+            maxWidth: '1000px',
+            height: '90vh',
+            panelClass: 'visor-pdf-dialog'
+        });
     }
 
     resetForm() {

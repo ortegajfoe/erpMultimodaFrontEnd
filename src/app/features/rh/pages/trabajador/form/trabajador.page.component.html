@@ -17,7 +17,6 @@
                             (click)="fileInput.click()">
 
                             @if (photoPreview() || currentPhotoUrl) {
-
                             <img [src]="photoPreview() || apiUrl + currentPhotoUrl"
                                 class="w-full h-full object-cover transition-transform group-hover:scale-105"
                                 alt="Avatar">
@@ -27,46 +26,35 @@
                             </div>
                             }
 
-
-                            <ng-template #placeholderInfo>
-                                <div class="flex flex-col items-center justify-center w-full h-full text-gray-400">
-                                    <mat-icon class="scale-150">add_a_photo</mat-icon>
-                                </div>
-                            </ng-template>
-
-
                             <div
                                 class="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all">
                                 <mat-icon class="text-white scale-125">photo_camera</mat-icon>
                             </div>
                         </div>
-
-
                         <input #fileInput type="file" (change)="onPhotoSelected($event)" class="hidden"
                             accept="image/*">
                     </div>
 
-
                     <div class="flex-grow grid grid-cols-12 gap-3">
-
 
                         <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                             <mat-label>Nombre</mat-label>
-                            <input matInput formControlName="nombre" placeholder="Ej. Juan" appUpperCase>
+                            <input matInput formControlName="nombre" placeholder="Ingresa el nombre" appUpperCase>
                             <mat-error>Requerido</mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                             <mat-label>Apellido Paterno</mat-label>
-                            <input matInput formControlName="apPaterno" placeholder="Ej. Perez" appUpperCase>
+                            <input matInput formControlName="apPaterno" placeholder="Ingresa el apellido paterno"
+                                appUpperCase>
                             <mat-error>Requerido</mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                             <mat-label>Apellido Materno</mat-label>
-                            <input matInput formControlName="apMaterno" placeholder="Ej. Lopez" appUpperCase>
+                            <input matInput formControlName="apMaterno" placeholder="Ingresa el apellido materno"
+                                appUpperCase>
                         </mat-form-field>
-
 
                         <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                             <mat-label>Fecha de Nacimiento</mat-label>
@@ -80,19 +68,32 @@
                             <mat-label>RFC</mat-label>
                             <input matInput formControlName="rfc" placeholder="ABCD800101XXX" appUpperCase
                                 maxlength="13">
-                            <mat-error>RFC Invalido (Física 13, Moral 12)</mat-error>
+                            <mat-error>
+                                @if (form.get('rfc')?.hasError('required')) {
+                                El RFC es obligatorio.
+                                }
+                                @else if (form.get('rfc')?.hasError('invalidRfc')) {
+                                El RFC es inválido.
+                                }
+                            </mat-error>
                         </mat-form-field>
 
                         <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                             <mat-label>CURP</mat-label>
                             <input matInput formControlName="curp" appUpperCase maxlength="18">
-                            <mat-error>CURP Invalido (18 caracteres)</mat-error>
+                            <mat-error>
+                                @if (form.get('curp')?.hasError('required')) {
+                                La CURP es obligatoria.
+                                }
+                                @else if (form.get('curp')?.hasError('invalidCurp')) {
+                                La CURP es inválida.
+                                }
+                            </mat-error>
                         </mat-form-field>
 
                     </div>
                 </div>
             </div>
-
 
             <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
                 <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
@@ -102,37 +103,65 @@
 
                 <div class="grid grid-cols-12 gap-3">
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-3">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
                         <mat-label>País</mat-label>
                         <mat-select formControlName="pais">
-                            <mat-option [value]="1">MÉXICO</mat-option>
-                            <mat-option [value]="2">USA</mat-option>
+                            @for (p of paises(); track p.idPais) {
+                            <mat-option [value]="p.idPais">{{ p.pais }}</mat-option>
+                            } @empty {
+                            <mat-option disabled>Sin datos</mat-option>
+                            }
                         </mat-select>
                         <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
-                        <mat-label>CP</mat-label>
-                        <input matInput type="number" formControlName="cp" placeholder="00000" maxlength="5">
-                        <mat-error>5 dígitos</mat-error>
+                        <mat-label>Código Postal</mat-label>
+                        <input matInput formControlName="cp" placeholder="00000" maxlength="5" appOnlyNumbers>
+                        @if (loadingCp()) {
+                        <mat-spinner matSuffix diameter="18"></mat-spinner>
+                        } @else {
+                        <mat-icon matSuffix class="text-gray-400 text-sm">search</mat-icon>
+                        }
+                        <mat-error>(5 dígitos)</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-3">
-                        <mat-label>Ciudad (ID)</mat-label>
-                        <input matInput type="number" formControlName="ciudad">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
+                        <mat-label>Estado</mat-label>
+                        <mat-select formControlName="estado" [disabled]="estados().length === 0">
+                            @for (e of estados(); track e.idEstado) {
+                            <mat-option [value]="e.idEstado">{{ e.Estado }}</mat-option>
+                            } @empty {
+                            <mat-option disabled>Selecciona un país</mat-option>
+                            }
+                        </mat-select>
                         <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
-                        <mat-label>Estado (ID)</mat-label>
-                        <input matInput type="number" formControlName="estado">
-                        <mat-error>Requerido</mat-error>
+                        <mat-label>Ciudad</mat-label>
+                        <mat-select formControlName="ciudad" [disabled]="ciudades().length === 0">
+                            @for (c of ciudades(); track c.idCiudad) {
+                            <mat-option [value]="c.idCiudad">{{ c.Ciudad }}</mat-option>
+                            } @empty {
+                            <mat-option disabled>Selecciona un estado</mat-option>
+                            }
+                        </mat-select>
+                        <mat-error>Requerida</mat-error>
                     </mat-form-field>
 
-                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
+                    <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                         <mat-label>Colonia</mat-label>
+                        @if (colonias().length > 0) {
+                        <mat-select formControlName="colonia">
+                            @for (col of colonias(); track col.idCodigoPostal) {
+                            <mat-option [value]="col.colonia">{{ col.colonia }}</mat-option>
+                            }
+                        </mat-select>
+                        } @else {
                         <input matInput formControlName="colonia" appUpperCase>
-                        <mat-error>Requerido</mat-error>
+                        }
+                        <mat-error>Requerida</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-8">
@@ -143,14 +172,13 @@
 
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
                         <mat-label>No. Ext</mat-label>
-                        <input matInput type="number" formControlName="numExt" maxlength="5">
-                        <mat-error>5 dígitos</mat-error>
+                        <input matInput formControlName="numExt" maxlength="5" appUpperCase>
+                        <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-2">
                         <mat-label>No. Int</mat-label>
-                        <input matInput type="number" formControlName="numInt" maxlength="5">
-                        <mat-error>5 dígitos</mat-error>
+                        <input matInput formControlName="numInt" maxlength="5" appUpperCase>
                     </mat-form-field>
 
                 </div>
@@ -166,7 +194,15 @@
                 <div class="grid grid-cols-12 gap-3">
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                         <mat-label>NSS</mat-label>
-                        <input matInput formControlName="nss">
+                        <input matInput formControlName="nss" maxlength="11" appOnlyNumbers>
+                        <mat-error>
+                            @if (form.get('nss')?.hasError('required')) {
+                            El NSS es obligatorio.
+                            }
+                            @else if (form.get('nss')?.hasError('minlength')) {
+                            El NSS debe tener 11 caracteres.
+                            }
+                        </mat-error>
                     </mat-form-field>
 
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
@@ -181,17 +217,14 @@
                         <mat-label>Salario Mensual</mat-label>
                         <input matInput type="number" formControlName="salarioMensual" placeholder="0.00">
                         <span matTextPrefix>$&nbsp;</span>
-                        <mat-error>Min 0</mat-error>
+                        <mat-error>Ingrese un salario válido</mat-error>
                     </mat-form-field>
-
 
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
                         <mat-label>Departamento</mat-label>
                         <mat-select formControlName="idDepartamento">
                             @for (dept of departamentos(); track dept.idDepartamento) {
-                            <mat-option [value]="dept.idDepartamento">
-                                {{dept.departamento}}
-                            </mat-option>
+                            <mat-option [value]="dept.idDepartamento">{{dept.departamento}}</mat-option>
                             } @empty {
                             <mat-option disabled>No hay departamentos</mat-option>
                             }
@@ -202,10 +235,8 @@
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
                         <mat-label>Puesto</mat-label>
                         <mat-select formControlName="idPuesto">
-                            @for (to of puestos(); track to.idPuesto) {
-                            <mat-option [value]="to.idPuesto">
-                                {{to.puesto}}
-                            </mat-option>
+                            @for (to of puestosFiltrados(); track to.idPuesto) {
+                            <mat-option [value]="to.idPuesto">{{to.puesto}}</mat-option>
                             } @empty {
                             <mat-option disabled>No hay puestos disponibles</mat-option>
                             }
@@ -213,14 +244,11 @@
                         <mat-error>Requerido</mat-error>
                     </mat-form-field>
 
-
                     <mat-form-field appearance="outline" class="col-span-12 md:col-span-6">
                         <mat-label>Nivel</mat-label>
                         <mat-select formControlName="idNivel">
                             @for (nivel of niveles(); track nivel.idNivel) {
-                            <mat-option [value]="nivel.idNivel">
-                                {{nivel.nivel}}
-                            </mat-option>
+                            <mat-option [value]="nivel.idNivel">{{nivel.nivel}}</mat-option>
                             } @empty {
                             <mat-option disabled>No hay niveles disponibles</mat-option>
                             }
@@ -232,9 +260,7 @@
                         <mat-label>Tipo Trabajador</mat-label>
                         <mat-select formControlName="tipoTrabajador">
                             @for (tipo of tiposTrabajador(); track tipo.idTipoTrabajador) {
-                            <mat-option [value]="tipo.idTipoTrabajador">
-                                {{tipo.tipoTrabajador}}
-                            </mat-option>
+                            <mat-option [value]="tipo.idTipoTrabajador">{{tipo.tipoTrabajador}}</mat-option>
                             } @empty {
                             <mat-option disabled>No hay tipos disponibles</mat-option>
                             }
@@ -277,5 +303,6 @@
     } @else {
     <ng-container *ngTemplateOutlet="formContent"></ng-container>
     }
+
 
 </app-form-layout>

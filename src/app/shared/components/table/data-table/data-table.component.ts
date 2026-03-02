@@ -40,6 +40,13 @@ export interface DataTableColumn<T> {
     filterPlaceholder?: string;
 }
 
+export interface TableCustomAction {
+    action: string;
+    icon: string;
+    tooltip?: string;
+    color?: 'primary' | 'accent' | 'warn';
+}
+
 @Component({
     selector: 'app-data-table',
     standalone: true,
@@ -82,11 +89,14 @@ export class DataTableComponent<T> implements OnChanges, OnDestroy {
     @Output() create = new EventEmitter<void>();
     @Output() edit = new EventEmitter<T>();
     @Output() remove = new EventEmitter<T>();
+    @Output() customAction = new EventEmitter<{ action: string; row: T }>();
     @Output() pageChange = new EventEmitter<PageEvent>();
     @Output() filterChange = new EventEmitter<{ key: string, value: string }>();
     @Output() clearFilters = new EventEmitter<void>();
     @Output() sortChange = new EventEmitter<Sort>();
     @Output() retry = new EventEmitter<void>();
+
+    @Input() customActions: TableCustomAction[] = [];
 
     private breakpointObserver = inject(BreakpointObserver);
     private cdr = inject(ChangeDetectorRef);

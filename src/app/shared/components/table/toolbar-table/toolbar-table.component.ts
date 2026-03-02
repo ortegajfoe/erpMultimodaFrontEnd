@@ -6,12 +6,13 @@ import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { DataTableColumn } from '../../../models/data-table.model';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { DataTableColumn, TableCustomAction } from '../../../models/data-table.model';
 
 @Component({
     selector: 'app-toolbar-table',
     standalone: true,
-    imports: [CommonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatButtonModule, MatIconModule, MatInputModule],
+    imports: [CommonModule, MatTableModule, MatPaginatorModule, MatSortModule, MatButtonModule, MatIconModule, MatInputModule, MatTooltipModule],
     templateUrl: './toolbar-table.component.html',
     styleUrls: ['./toolbar-table.component.scss']
 })
@@ -28,6 +29,9 @@ export class ToolbarTableComponent<T> implements OnChanges, AfterViewInit {
     @Output() edit = new EventEmitter<T>();
     @Output() remove = new EventEmitter<T>();
     @Output() create = new EventEmitter<void>();
+    @Output() customAction = new EventEmitter<{ action: string; row: T }>();
+
+    @Input() customActions: TableCustomAction[] = [];
 
     dataSource = new MatTableDataSource<T>([]);
     displayedColumns: string[] = [];
@@ -38,7 +42,17 @@ export class ToolbarTableComponent<T> implements OnChanges, AfterViewInit {
         if (changes['data']) this.dataSource.data = this.data || [];
         if (changes['columns']) {
             this.displayedColumns = this.columns.map(c => String(c.key));
-            if (this.edit.observed || this.remove.observed) this.displayedColumns.push('acciones');
+            if (this.edit.observed || this.remove.observed || this.customActions.length > 0)
+                this.displayedColumns.push('acciones');
+
+            this.dataSource.filterPredicate = (row: T, filter: string) => {
+                const searchStr = filter.toLowerCase();
+                return this.columns.some(col => {
+                    const cellValue = this.getValue(row, col);
+                    if (cellValue == null) return false;
+                    return String(cellValue).toLowerCase().includes(searchStr);
+                });
+            };
         }
     }
     ngAfterViewInit() {

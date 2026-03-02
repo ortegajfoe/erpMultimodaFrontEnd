@@ -79,6 +79,20 @@
             </a>
         </div>
 
+        <div class="nav-group">
+            <ng-container *ngIf="!collapsed">
+                <div class="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider mt-4 mb-1">
+                    Finanzas
+                </div>
+            </ng-container>
+
+            <a routerLink="/app/finanzas/bancos" routerLinkActive="active-pill" class="nav-item group"
+                [matTooltip]="collapsed ? 'Bancos' : ''" [matTooltipPosition]="'right'" (click)="navigate.emit()">
+                <mat-icon class="nav-icon">account_balance</mat-icon>
+                <span *ngIf="!collapsed" class="nav-text">Bancos</span>
+            </a>
+        </div>
+
     </div>
 
 

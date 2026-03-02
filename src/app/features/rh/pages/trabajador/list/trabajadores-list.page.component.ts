@@ -1,4 +1,4 @@
-import { Component, inject, TemplateRef, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, TemplateRef, OnInit, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -7,7 +7,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { createCatalogStore } from '../../../../../shared/stores/catalog-store';
 import { map } from 'rxjs/operators';
 import { TrabajadorService } from '../../../services/trabajador.service';
+import { DepartamentoService } from '../../../services/departamento.service';
+import { PuestoService } from '../../../services/puesto.service';
 import { Trabajador } from '../../../models/trabajador.model';
+import { Departamento } from '../../../models/departamento.model';
+import { Puesto } from '../../../models/puesto.model';
 import { SmartTableComponent, TableAction } from '../../../../../shared/components/table';
 import { DataTableColumn } from '../../../../../shared/models/data-table.model';
 
@@ -24,11 +28,16 @@ import { DataTableColumn } from '../../../../../shared/models/data-table.model';
     templateUrl: './trabajadores-list.page.component.html',
     styleUrls: ['./trabajadores-list.page.component.scss']
 })
-export class TrabajadoresListPageComponent {
+export class TrabajadoresListPageComponent implements OnInit {
     private trabajadorService = inject(TrabajadorService);
+    private departamentoService = inject(DepartamentoService);
+    private puestoService = inject(PuestoService);
     private dialog = inject(MatDialog);
     private snackBar = inject(MatSnackBar);
     private router = inject(Router);
+
+    departamentos = signal<Departamento[]>([]);
+    puestos = signal<Puesto[]>([]);
 
     readonly store = createCatalogStore<Trabajador>({
         source$: this.trabajadorService.getAll().pipe(map(r => r ?? [])),
@@ -69,12 +78,27 @@ export class TrabajadoresListPageComponent {
         },
         { key: 'rfc', label: 'RFC', filter: 'text' },
         { key: 'curp', label: 'CURP', filter: 'text' },
-        { key: 'idDepartamento', label: 'Dept', filter: 'number', chip: true },
-        { key: 'idPuesto', label: 'Puesto', filter: 'number' },
-        { key: 'tipoTrabajador', label: 'Tipo', filter: 'text', chip: true }
+        {
+            key: 'idDepartamento',
+            label: 'Dept',
+            filter: 'text',
+            chip: true,
+            valueFn: (row) => this.departamentos().find(d => d.idDepartamento === row.idDepartamento)?.departamento || String(row.idDepartamento || 'N/A')
+        },
+        {
+            key: 'idPuesto',
+            label: 'Puesto',
+            filter: 'text',
+            valueFn: (row) => this.puestos().find(p => p.idPuesto === row.idPuesto)?.puesto || String(row.idPuesto || 'N/A')
+        }
     ];
 
     @ViewChild('deleteDialog') deleteDialog!: TemplateRef<any>;
+
+    ngOnInit() {
+        this.departamentoService.getAll().subscribe(res => this.departamentos.set(res));
+        this.puestoService.getAll().subscribe(res => this.puestos.set(res));
+    }
 
     onAction(event: TableAction<Trabajador>) {
         switch (event.action) {
