@@ -101,6 +101,18 @@ input,
   color: var(--brand-primary) !important;
 }
 
+.mat-mdc-icon-button.mat-primary {
+  color: var(--brand-primary) !important;
+}
+
+.mat-mdc-icon-button.mat-accent {
+  color: #0ea5e9 !important; /* Tailwind sky-500 */
+}
+
+.mat-mdc-icon-button.mat-warn {
+  color: #ef4444 !important; /* Tailwind red-500 */
+}
+
 .bg-primary {
   background-color: var(--brand-primary) !important;
 }

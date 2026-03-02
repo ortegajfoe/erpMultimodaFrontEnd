@@ -14,9 +14,11 @@ export class TrabajadorService {
 
     getAll(): Observable<Trabajador[]> {
 
-        return this.http.request<any>('GET', this.apiUrl, {
-            params: { idEmpresa: 1 }
-        }).pipe(
+        return this.http.request<any>('GET', this.apiUrl,
+            //     {
+            //     params: { idEmpresa: 1 }
+            // }
+        ).pipe(
             map(response => {
                 if (Array.isArray(response)) return response;
                 return response.data;
@@ -25,9 +27,11 @@ export class TrabajadorService {
     }
 
     getById(id: number): Observable<Trabajador> {
-        return this.http.request<any>('GET', `${this.apiUrl}/${id}`, {
-            params: { idEmpresa: 1 }
-        }).pipe(
+        return this.http.request<any>('GET', `${this.apiUrl}/${id}`,
+            //      {
+            //     params: { idEmpresa: 1 }
+            // }
+        ).pipe(
             map(response => {
                 return response.data || response.dato || response;
             })

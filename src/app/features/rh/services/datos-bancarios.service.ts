@@ -4,6 +4,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '@env/environment';
 import { DatosBancarios } from '../models/rh-auxiliares.model';
+interface DatosBancariosRequest {
+    idTrabajador: number;
+    tipoVinculo: string;
+    idDatoBancario: number;
+}
 
 @Injectable({
     providedIn: 'root'
@@ -12,26 +17,23 @@ export class DatosBancariosService {
     private http = inject(HttpClient);
     private apiUrl = `${environment.apiUrl}/api/rh/datosBancarios`;
 
-    getByTrabajador(idTrabajador: number, idEmpresa: number = 1): Observable<DatosBancarios[]> {
+    getByTrabajador(data: DatosBancariosRequest): Observable<DatosBancarios[]> {
         const params = new HttpParams()
-            .set('idEmpresa', idEmpresa.toString())
-            .set('idTrabajador', idTrabajador.toString());
-        return this.http.get<any>(`${this.apiUrl}/${idTrabajador}`, { params }).pipe(
+            .set('tipoVinculo', data.tipoVinculo.toString())
+            .set('idDatoBancario', data.idDatoBancario.toString());
+
+        return this.http.get<any>(`${this.apiUrl}/${data.idTrabajador}`, { params }).pipe(
             map(response => {
-                const data = response?.data;
-                if (Array.isArray(data)) {
-                    return data;
-                }
-                return data?.recordset ?? [];
+                console.log(response);
+                return response?.data;
             })
         );
     }
 
     create(data: DatosBancarios): Observable<any> {
+        debugger
         const payload = {
             ...data,
-            idEmpresa: data.idEmpresa || 1,
-            userAlta: 1 // TODO: get from auth service
         };
         return this.http.post<any>(this.apiUrl, payload);
     }
@@ -39,8 +41,6 @@ export class DatosBancariosService {
     update(id: number, data: DatosBancarios): Observable<any> {
         const payload = {
             ...data,
-            idEmpresa: data.idEmpresa || 1,
-            userMod: 1 // TODO: get from auth service
         };
         return this.http.put<any>(`${this.apiUrl}/${id}`, payload);
     }

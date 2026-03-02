@@ -131,6 +131,15 @@
                             <th mat-header-cell *matHeaderCellDef> Acciones </th>
                             <td mat-cell *matCellDef="let row">
                                 <div class="flex justify-end gap-2">
+                                    @if (customActions.length > 0) {
+                                    @for (ca of customActions; track ca.action) {
+                                    <button mat-icon-button [color]="ca.color || 'primary'"
+                                        [matTooltip]="ca.tooltip || ca.action"
+                                        (click)="customAction.emit({ action: ca.action, row: row })">
+                                        <mat-icon>{{ ca.icon }}</mat-icon>
+                                    </button>
+                                    }
+                                    } @else {
                                     <button mat-icon-button color="primary" (click)="edit.emit(row)"
                                         matTooltip="Editar">
                                         <mat-icon>edit</mat-icon>
@@ -139,6 +148,7 @@
                                         matTooltip="Eliminar">
                                         <mat-icon>delete</mat-icon>
                                     </button>
+                                    }
                                 </div>
                             </td>
                         </ng-container>

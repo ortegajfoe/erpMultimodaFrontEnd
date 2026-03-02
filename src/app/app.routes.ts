@@ -22,6 +22,10 @@ export const routes: Routes = [
             },
             ...rhRoutes,
             {
+                path: 'finanzas',
+                loadChildren: () => import('./features/finanzas/finanzas.routhes').then(m => m.finanzasRoutes)
+            },
+            {
                 path: '',
                 loadChildren: () => import('./features/sistema/sistema.routes').then(m => m.sistemaRoutes)
             },

@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, ViewChild } from '@angular/core';
+import { Component, inject, signal, OnInit, ViewChild, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -13,6 +13,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
 
 import { TrabajadorService } from '../../../services/trabajador.service';
 import { DepartamentoService } from '../../../services/departamento.service';
@@ -22,6 +23,7 @@ import { TipoTrabajadorService } from '../../../services/tipo-trabajador.service
 import { Departamento } from '../../../models/departamento.model';
 import { Puesto } from '../../../models/puesto.model';
 import { Nivel, TipoTrabajador } from '../../../models/rh-catalogos.model';
+import { Pais, Estado, Ciudad, CodigoPostalResult } from '@core/master-data/geografia/geografia.model';
 import { FormLayoutComponent } from '../../../../../shared/components/layout/form-layout/form-layout.component';
 import { MxValidators } from '@shared/ui';
 import { SHARED_DIRECTIVES } from '../../../../../shared/directives';
@@ -29,6 +31,9 @@ import { TrabajadorBancosComponent } from '../components/bancos/trabajador-banco
 import { TrabajadorDocumentosComponent } from '../components/documentos/trabajador-documentos.component';
 
 import { environment } from 'src/environments/environment';
+import { debounceTime, distinctUntilChanged, switchMap, catchError, map } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { GeografiaService } from '@core/master-data/geografia/geografia.service';
 
 @Component({
     selector: 'app-trabajador-page',
@@ -47,6 +52,7 @@ import { environment } from 'src/environments/environment';
         MatTabsModule,
         MatSelectModule,
         MatProgressSpinnerModule,
+        MatAutocompleteModule,
         FormLayoutComponent,
         SHARED_DIRECTIVES,
         TrabajadorBancosComponent,
@@ -65,9 +71,11 @@ export class TrabajadorCreatePageComponent implements OnInit {
     private puestoService = inject(PuestoService);
     private nivelService = inject(NivelService);
     private tipoTrabajadorService = inject(TipoTrabajadorService);
+    private geografiaService = inject(GeografiaService);
     private snackBar = inject(MatSnackBar);
 
     loading = signal<boolean>(false);
+    loadingCp = signal<boolean>(false);
     id = signal<number | null>(null);
 
     selectedTabIndex = 0;
@@ -82,6 +90,22 @@ export class TrabajadorCreatePageComponent implements OnInit {
     niveles = signal<Nivel[]>([]);
     tiposTrabajador = signal<TipoTrabajador[]>([]);
 
+    selectedDepartamentoId = signal<number | null>(null);
+
+    puestosFiltrados = computed(() => {
+        const idDep = this.selectedDepartamentoId();
+        if (!idDep) return this.puestos();
+        return this.puestos().filter(p => p.idDepartamento === idDep);
+    });
+
+    paises = this.geografiaService.paises;
+    estados = this.geografiaService.estados;
+    ciudades = this.geografiaService.ciudades;
+    colonias = signal<CodigoPostalResult[]>([]);
+    @ViewChild(TrabajadorBancosComponent) bancosComponent!: TrabajadorBancosComponent;
+    @ViewChild(TrabajadorDocumentosComponent) documentosComponent!: TrabajadorDocumentosComponent;
+    private cpSearch = new Subject<string>();
+
     form: FormGroup = this.fb.group({
         idTrabajador: [null],
         nombre: ['', Validators.required],
@@ -92,15 +116,15 @@ export class TrabajadorCreatePageComponent implements OnInit {
         curp: ['', [Validators.required, MxValidators.curp, Validators.maxLength(18)]],
         direccion: ['', Validators.required],
         direccion2: [''],
-        numExt: ['', Validators.required],
+        numExt: ['', [Validators.required, Validators.maxLength(5)]],
         numInt: [''],
         colonia: ['', Validators.required],
         cp: ['', [Validators.required, Validators.pattern('^[0-9]{5}$')]],
-        ciudad: [1, Validators.required],
-        estado: [1, Validators.required],
-        pais: [1, Validators.required],
+        ciudad: [null, Validators.required],
+        estado: [null, Validators.required],
+        pais: [null, Validators.required],
 
-        nss: ['', Validators.maxLength(11)],
+        nss: ['', [Validators.required, Validators.maxLength(11), Validators.minLength(11)]],
         fechaIngreso: [new Date(), Validators.required],
         idDepartamento: [1, Validators.required],
         idPuesto: [1, Validators.required],
@@ -108,9 +132,6 @@ export class TrabajadorCreatePageComponent implements OnInit {
         salarioMensual: [0, [Validators.required, Validators.min(0)]],
         tipoTrabajador: [1, Validators.required],
         notas: [''],
-
-        idEmpresa: [1],
-        userAlta: [1],
         fotoUrl: ['']
     });
 
@@ -120,6 +141,9 @@ export class TrabajadorCreatePageComponent implements OnInit {
 
     ngOnInit() {
         this.loadCatalogos();
+        this.setupCpAutofill();
+        this.setupUbicacionCascade();
+        this.listDepartamento();
 
         this.route.params.subscribe(params => {
             if (params['id']) {
@@ -130,6 +154,106 @@ export class TrabajadorCreatePageComponent implements OnInit {
                 this.loadWorker(this.workerId!);
             }
         });
+    }
+
+    private listDepartamento() {
+        const current = this.form.get('idDepartamento')?.value;
+        if (current) this.selectedDepartamentoId.set(Number(current));
+
+        this.form.get('idDepartamento')!.valueChanges.pipe(
+            distinctUntilChanged()
+        ).subscribe(idDep => {
+            this.selectedDepartamentoId.set(idDep ? Number(idDep) : null);
+            const currentPuesto = this.form.get('idPuesto')?.value;
+            const puestoValido = this.puestos().some(
+                p => p.idPuesto === Number(currentPuesto) && p.idDepartamento === Number(idDep)
+            );
+            if (!puestoValido) {
+                this.form.patchValue({ idPuesto: null }, { emitEvent: false });
+            }
+        });
+    }
+
+    private setupUbicacionCascade() {
+        this.geografiaService.loadPaises();
+
+        this.form.get('pais')!.valueChanges.pipe(
+            distinctUntilChanged()
+        ).subscribe(idPais => {
+            if (idPais) {
+                this.form.patchValue({ estado: null, ciudad: null }, { emitEvent: false });
+                this.geografiaService.loadEstados(Number(idPais));
+                const currentCp = this.form.get('cp')?.value;
+                if (currentCp && currentCp.length === 5) {
+                    this.cpSearch.next(currentCp);
+                }
+            }
+        });
+
+        this.form.get('estado')!.valueChanges.pipe(
+            distinctUntilChanged()
+        ).subscribe(idEstado => {
+            if (idEstado) {
+                this.form.patchValue({ ciudad: null }, { emitEvent: false });
+                this.geografiaService.loadCiudades(Number(idEstado));
+            }
+        });
+    }
+
+    private setupCpAutofill() {
+        this.cpSearch.pipe(
+            debounceTime(600),
+            distinctUntilChanged(),
+            switchMap(cp => {
+                if (cp && cp.length === 5) {
+                    const idPais = this.form.get('pais')?.value;
+                    if (!idPais) {
+                        this.colonias.set([]);
+                        return of([]);
+                    }
+
+                    this.loadingCp.set(true);
+                    return this.geografiaService.getColoniasByCp(cp).pipe(
+                        map((data: CodigoPostalResult[]) => data.filter((c: any) => c.idPais === idPais)),
+                        catchError(() => {
+                            this.loadingCp.set(false);
+                            this.colonias.set([]);
+                            return of([]);
+                        })
+                    );
+                }
+                this.colonias.set([]);
+                return of([]);
+            })
+        ).subscribe(data => {
+            this.loadingCp.set(false);
+            this.colonias.set(data);
+            if (data && data.length > 0) {
+                const first = data[0];
+                setTimeout(() => {
+                    if (first.idEstado) {
+                        this.form.patchValue({ estado: first.idEstado }, { emitEvent: true });
+                    }
+                    setTimeout(() => {
+                        if (first.idCiudad) {
+                            this.form.patchValue({ ciudad: first.idCiudad }, { emitEvent: false });
+                        }
+                        if (data.length === 1) {
+                            this.form.patchValue({ colonia: first.colonia }, { emitEvent: false });
+                        }
+                    }, 400);
+                }, 400);
+            }
+        });
+
+        this.form.get('cp')!.valueChanges.subscribe(value => {
+            this.cpSearch.next(value);
+        });
+    }
+
+    onCpInput(event: Event) {
+        const value = (event.target as HTMLInputElement).value;
+        this.cpSearch.next(value);
     }
 
     loadCatalogos() {
@@ -186,6 +310,13 @@ export class TrabajadorCreatePageComponent implements OnInit {
                     if (worker) {
                         this.form.patchValue(worker);
                         this.currentPhotoUrl = worker.fotoUrl || null;
+
+                        if (worker.pais) {
+                            this.geografiaService.loadEstados(Number(worker.pais));
+                            if (worker.estado) {
+                                this.geografiaService.loadCiudades(Number(worker.estado));
+                            }
+                        }
                     }
                 }, 0);
             },
@@ -199,9 +330,6 @@ export class TrabajadorCreatePageComponent implements OnInit {
             }
         });
     }
-    @ViewChild(TrabajadorBancosComponent) bancosComponent!: TrabajadorBancosComponent;
-    @ViewChild(TrabajadorDocumentosComponent) documentosComponent!: TrabajadorDocumentosComponent;
-
     save() {
         switch (this.selectedTabIndex) {
             case 0:
@@ -227,19 +355,17 @@ export class TrabajadorCreatePageComponent implements OnInit {
 
         const trabajadorRaw = {
             ...formValue,
-            ciudad: Number(formValue.ciudad) || 1,
-            estado: Number(formValue.estado) || 1,
-            pais: Number(formValue.pais) || 1,
+            ciudad: Number(formValue.ciudad) || null,
+            estado: Number(formValue.estado) || null,
+            pais: Number(formValue.pais) || null,
             tipoTrabajador: Number(formValue.tipoTrabajador) || 1,
             idDepartamento: Number(formValue.idDepartamento) || 1,
             idPuesto: Number(formValue.idPuesto) || 1,
             idNivel: Number(formValue.idNivel) || 1,
-            idEmpresa: Number(formValue.idEmpresa) || 1,
-            userAlta: Number(formValue.userAlta) || 1,
             salarioMensual: Number(formValue.salarioMensual) || 0
         };
 
-        let request$: any;
+        let request: any;
 
         if (this.selectedFile) {
             const formData = new FormData();
@@ -252,16 +378,16 @@ export class TrabajadorCreatePageComponent implements OnInit {
                     formData.append(key, value.toString());
                 }
             });
-            request$ = this.isEditMode && this.workerId
+            request = this.isEditMode && this.workerId
                 ? this.trabajadorService.update(this.workerId, formData)
                 : this.trabajadorService.insert(formData);
         } else {
-            request$ = this.isEditMode && this.workerId
+            request = this.isEditMode && this.workerId
                 ? this.trabajadorService.update(this.workerId, trabajadorRaw)
                 : this.trabajadorService.insert(trabajadorRaw);
         }
 
-        request$.subscribe({
+        request.subscribe({
             next: (res: any) => {
                 this.loading.set(false);
                 if (res.exito === 1 || res.status === 'success' || res.data) {
@@ -296,7 +422,6 @@ export class TrabajadorCreatePageComponent implements OnInit {
                     this.loading.set(false);
                     if (res && (res.exito === 1 || res.status === 'success')) {
                         this.snackBar.open('Cuenta guardada correctamente', 'Cerrar', { duration: 3000 });
-                    } else {
                     }
                 },
                 error: (err: any) => {
@@ -322,7 +447,6 @@ export class TrabajadorCreatePageComponent implements OnInit {
                     this.loading.set(false);
                     if (res && (res.exito === 1 || res.status === 'success')) {
                         this.snackBar.open('Documento subido correctamente', 'Cerrar', { duration: 3000 });
-                    } else {
                     }
                 },
                 error: (err: any) => {
@@ -338,36 +462,5 @@ export class TrabajadorCreatePageComponent implements OnInit {
 
     cancel() {
         this.router.navigate(['/app/rh/trabajadores']);
-    }
-
-    private detectErrorTab() {
-        const controls = this.form.controls;
-
-        const personalFields = ['nombre', 'apPaterno', 'apMaterno', 'fechaNacimiento', 'rfc', 'curp'];
-        for (const field of personalFields) {
-            if (controls[field].invalid) {
-                this.selectedTabIndex = 0;
-                this.snackBar.open('Error en Datos Personales', 'Ver', { duration: 3000 });
-                return;
-            }
-        }
-
-        const addressFields = ['direccion', 'numExt', 'colonia', 'cp', 'ciudad', 'estado', 'pais'];
-        for (const field of addressFields) {
-            if (controls[field].invalid) {
-                this.selectedTabIndex = 1;
-                this.snackBar.open('Error en Domicilio', 'Ver', { duration: 3000 });
-                return;
-            }
-        }
-
-        const workFields = ['nss', 'fechaIngreso', 'salarioMensual', 'idDepartamento', 'idPuesto', 'idNivel', 'tipoTrabajador'];
-        for (const field of workFields) {
-            if (controls[field].invalid) {
-                this.selectedTabIndex = 2;
-                this.snackBar.open('Error en Información Laboral', 'Ver', { duration: 3000 });
-                return;
-            }
-        }
     }
 }

@@ -14,9 +14,14 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
-import { SHARED_DIRECTIVES } from '../../../../../../shared/directives'; // Absolute relative path
-import { DatosBancariosService } from '../../../../services/datos-bancarios.service';
-import { DatosBancarios } from '../../../../models/rh-auxiliares.model';
+import { SHARED_DIRECTIVES } from '../../../../../../shared/directives';
+import { DatosBancariosService } from '@features/rh/services/datos-bancarios.service';
+import { DatosBancarios } from '@features/rh/models/rh-auxiliares.model';
+import { Banco } from '@features/finanzas/models/banco.model';
+import { BancoService } from '@features/finanzas/services/banco.services';
+import { ConfirmDialogComponent, DialogData } from '../../../../../../shared/components/feedback/confirm-dialog/confirm-dialog.component';
+import { UiAlertComponent, UiAlertData } from '@shared/ui/alert/ui-alert.component';
+import { UiButtonComponent } from '@shared/ui/button/ui-button.component';
 
 @Component({
     selector: 'app-trabajador-bancos',
@@ -33,7 +38,8 @@ import { DatosBancarios } from '../../../../models/rh-auxiliares.model';
         MatSlideToggleModule,
         MatDialogModule,
         MatTooltipModule,
-        SHARED_DIRECTIVES
+        SHARED_DIRECTIVES,
+        UiButtonComponent
     ],
     templateUrl: './trabajador-bancos.component.html',
     styles: [`
@@ -57,31 +63,30 @@ export class TrabajadorBancosComponent {
     private datosBancariosService = inject(DatosBancariosService);
     private fb = inject(FormBuilder);
     private snackBar = inject(MatSnackBar);
+    private bancoService = inject(BancoService);
+    private dialog = inject(MatDialog);
 
     datosBancarios = signal<DatosBancarios[]>([]);
     showForm = signal<boolean>(false);
     editingId = signal<number | null>(null);
-
-    bancos = [
-        { id: 1, nombre: 'BBVA' },
-        { id: 2, nombre: 'Santander' },
-        { id: 3, nombre: 'Banamex' },
-        { id: 4, nombre: 'Banorte' },
-        { id: 5, nombre: 'HSBC' },
-        { id: 6, nombre: 'Scotiabank' },
-        { id: 7, nombre: 'Inbursa' },
-        { id: 8, nombre: 'Banco Azteca' }
-    ];
+    bancos = signal<Banco[]>([]);
 
     form: FormGroup = this.fb.group({
         idBanco: [null, Validators.required],
         cuenta: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(10), Validators.pattern('^[0-9]{10}$')]],
         clabeInterbancaria: ['', [Validators.required, Validators.minLength(18), Validators.maxLength(18), Validators.pattern('^[0-9]{18}$')]],
-        preferida: [true],
-        notas: ['']
+        tarjeta: ['', [Validators.minLength(16), Validators.maxLength(16), Validators.pattern('^[0-9]{16}$')]],
+        preferida: [false],
+        notas: [''],
+        tipoVinculo: ['trabajador'],
     });
 
     constructor() {
+        this.bancoService.getBancos().subscribe({
+            next: (data) => { this.bancos.set(data) },
+            error: () => { }
+        });
+
         effect(() => {
             const id = this.idTrabajador();
             if (id) {
@@ -91,8 +96,15 @@ export class TrabajadorBancosComponent {
     }
 
     loadDatosBancarios(id: number) {
-        this.datosBancariosService.getByTrabajador(id).subscribe({
-            next: (data) => this.datosBancarios.set(data),
+        this.datosBancariosService.getByTrabajador({ idTrabajador: id, tipoVinculo: 'trabajador', idDatoBancario: 0 }).subscribe({
+            next: (res) => {
+                console.log('Datos bancarios', res);
+                const data = res.map((item: any) => ({
+                    ...item,
+                    preferida: String(item.preferida) === '1'
+                }));
+                this.datosBancarios.set(data)
+            },
             error: (err) => console.error('Error cargando datos bancarios', err)
         });
     }
@@ -109,55 +121,86 @@ export class TrabajadorBancosComponent {
             this.form.markAllAsTouched();
             return null;
         }
-
         const formValue = this.form.value;
+
         const datos: DatosBancarios = {
             ...formValue,
-            idTrabajador: this.idTrabajador(),
-            idBanco: Number(formValue.idBanco)
+            vinculo: this.idTrabajador()
         };
 
-        const request$ = this.editingId()
+        const request = this.editingId()
             ? this.datosBancariosService.update(this.editingId()!, datos)
             : this.datosBancariosService.create(datos);
 
-        return request$.pipe(
+        return request.pipe(
             tap((res) => {
+                debugger
                 if (res.exito === 1) {
                     this.loadDatosBancarios(this.idTrabajador());
                     this.cancelEdit();
+                } else if (res.exito === 0) {
+                    this.dialog.open(UiAlertComponent, {
+                        data: {
+                            title: 'Advertencia',
+                            message: res.mensaje,
+                            type: 'warning',
+                            confirmText: 'Entendido'
+                        } as UiAlertData,
+                        width: '400px'
+                    });
+                } else {
+                    console.log('Error al guardar los datos bancarios', res);
+                    this.snackBar.open('Error al guardar los datos bancarios', 'Cerrar', { duration: 3000 });
                 }
             })
         );
     }
 
     edit(item: DatosBancarios) {
-        this.editingId.set(item.idDatosBancarios!);
+        this.editingId.set(item.idDatoBancario!);
         this.form.patchValue({
             idBanco: item.idBanco,
             cuenta: item.cuenta,
             clabeInterbancaria: item.clabeInterbancaria,
+            tarjeta: item.tarjeta,
             preferida: item.preferida,
+            tipoVinculo: item.tipoVinculo,
+            vinculo: item.vinculo,
             notas: item.notas
         });
         this.showForm.set(true);
     }
 
     delete(item: DatosBancarios) {
-        if (confirm('¿Estás seguro de eliminar esta cuenta?')) {
-            this.datosBancariosService.delete(item.idDatosBancarios!).subscribe({
-                next: (res) => {
-                    if (res.exito === 1) {
-                        this.snackBar.open('Cuenta eliminada', 'Cerrar', { duration: 3000 });
-                        this.loadDatosBancarios(this.idTrabajador());
+        const dialogData: DialogData = {
+            title: 'Eliminar Cuenta Bancaria',
+            message: `¿Estás seguro de eliminar la cuenta ${item.cuenta}?`,
+            type: 'delete',
+            confirmText: 'Eliminar',
+            cancelText: 'Cancelar'
+        };
+
+        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+            data: dialogData,
+            width: '400px'
+        });
+
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.datosBancariosService.delete(item.idDatoBancario!).subscribe({
+                    next: (res) => {
+                        if (res.exito === 1) {
+                            this.snackBar.open('Cuenta eliminada', 'Cerrar', { duration: 3000 });
+                            this.loadDatosBancarios(this.idTrabajador());
+                        }
+                    },
+                    error: (err) => {
+                        console.error(err);
+                        this.snackBar.open('Error al eliminar', 'Cerrar', { duration: 3000 });
                     }
-                },
-                error: (err) => {
-                    console.error(err);
-                    this.snackBar.open('Error al eliminar', 'Cerrar', { duration: 3000 });
-                }
-            });
-        }
+                });
+            }
+        });
     }
 
     cancelEdit() {
@@ -167,6 +210,6 @@ export class TrabajadorBancosComponent {
     }
 
     getBancoNombre(id: number): string {
-        return this.bancos.find(b => b.id === id)?.nombre || 'Desconocido';
+        return this.bancos().find(b => b.idBanco === id)?.banco || 'Desconocido';
     }
 }

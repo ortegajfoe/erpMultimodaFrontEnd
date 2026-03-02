@@ -1,9 +1,10 @@
 <div class="space-y-4">
     <div class="flex justify-between items-center">
-        <h3 class="text-lg font-medium text-gray-800">Cuentas Bancarias</h3>
-        <button mat-flat-button color="primary" (click)="toggleForm()" *ngIf="!showForm()">
-            <mat-icon>add</mat-icon> Agregar Cuenta
-        </button>
+        <ui-button variant="primary" (onClick)="toggleForm()" *ngIf="!showForm()">
+            <div class="flex items-center gap-1">
+                <mat-icon>add</mat-icon> Agregar Cuenta
+            </div>
+        </ui-button>
     </div>
 
     @if (showForm()) {
@@ -14,8 +15,10 @@
             <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                 <mat-label>Banco</mat-label>
                 <mat-select formControlName="idBanco">
-                    @for (banco of bancos; track banco.id) {
-                    <mat-option [value]="banco.id">{{ banco.nombre }}</mat-option>
+                    @for (banco of bancos(); track banco.idBanco) {
+                    <mat-option [value]="banco.idBanco">{{ banco.banco }}</mat-option>
+                    } @empty {
+                    <mat-option disabled>Sin bancos</mat-option>
                     }
                 </mat-select>
                 <mat-error>Requerido</mat-error>
@@ -24,13 +27,43 @@
             <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                 <mat-label>Cuenta (10 dígitos)</mat-label>
                 <input matInput formControlName="cuenta" appOnlyNumbers [maxLen]="10">
-                <mat-error>10 dígitos numéricos</mat-error>
+                <mat-error>
+                    @if (form.get('cuenta')?.hasError('required')) {
+                    Requerido
+                    } @else if (form.get('cuenta')?.hasError('pattern')) {
+                    Deben ser exactamente 10 dígitos
+                    } @else if (form.get('cuenta')?.hasError('numerosInvalidos')) {
+                    {{ form.get('cuenta')?.getError('numerosInvalidos') }}
+                    }
+                </mat-error>
             </mat-form-field>
 
             <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
                 <mat-label>CLABE (18 dígitos)</mat-label>
                 <input matInput formControlName="clabeInterbancaria" appOnlyNumbers [maxLen]="18">
-                <mat-error>18 dígitos numéricos</mat-error>
+                <mat-error>
+                    @if (form.get('clabeInterbancaria')?.hasError('required')) {
+                    La CLABE es requerida
+                    } @else if (form.get('clabeInterbancaria')?.hasError('pattern')) {
+                    Deben ser exactamente 18 dígitos
+                    }@else if (form.get('clabeInterbancaria')?.hasError('numerosInvalidos')) {
+                    {{ form.get('clabeInterbancaria')?.getError('numerosInvalidos') }}
+                    }
+                </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="col-span-12 md:col-span-4">
+                <mat-label>Tarjeta (16 dígitos)</mat-label>
+                <input matInput formControlName="tarjeta" appOnlyNumbers [maxLen]="16">
+                <mat-error>
+                    @if (form.get('tarjeta')?.hasError('required')) {
+                    La tarjeta es requerida
+                    } @else if (form.get('tarjeta')?.hasError('pattern')) {
+                    Deben ser exactamente 16 dígitos
+                    }@else if (form.get('tarjeta')?.hasError('numerosInvalidos')) {
+                    {{ form.get('tarjeta')?.getError('numerosInvalidos') }}
+                    }
+                </mat-error>
             </mat-form-field>
 
             <div class="col-span-12 md:col-span-6 flex items-center">
@@ -43,16 +76,13 @@
                 <textarea matInput formControlName="notas" rows="2" appUpperCase></textarea>
             </mat-form-field>
 
-            <!-- <div class="col-span-12 flex justify-end gap-2">
-                <button mat-button type="button" (click)="cancelEdit()">Cancelar</button>
-                <button mat-flat-button color="primary" type="submit">Guardar</button>
-            </div> -->
+
         </form>
     </div>
     }
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        @for (item of datosBancarios(); track item.idDatosBancarios) {
+        @for (item of datosBancarios(); track item.idDatoBancario) {
         <div class="bank-card p-4 rounded-lg bg-white shadow-sm border border-gray-200 relative group"
             [class.active]="item.preferida">
 
@@ -81,6 +111,10 @@
                 <div class="flex justify-between">
                     <span>Cuenta:</span>
                     <span class="font-mono">{{ item.cuenta }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Tarjeta:</span>
+                    <span class="font-mono">{{ item.tarjeta }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span>CLABE:</span>
