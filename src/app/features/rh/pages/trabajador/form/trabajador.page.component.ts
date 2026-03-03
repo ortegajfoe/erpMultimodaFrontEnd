@@ -325,7 +325,7 @@ export class TrabajadorCreatePageComponent implements OnInit {
                     this.loading.set(false);
                     console.error(err);
                     this.snackBar.open('Error al cargar datos del trabajador', 'Cerrar', { duration: 3000 });
-                    this.router.navigate(['/app/rh/trabajadores']);
+                    this.router.navigate(['/app/rh/trabajador']);
                 }, 0);
             }
         });
@@ -394,7 +394,7 @@ export class TrabajadorCreatePageComponent implements OnInit {
                     const msg = this.isEditMode ? 'Trabajador actualizado correctamente' : 'Trabajador creado correctamente';
                     this.snackBar.open(msg, 'Cerrar', { duration: 3000 });
                     if (!this.isEditMode) {
-                        this.router.navigate(['/app/rh/trabajadores']);
+                        this.router.navigate(['/app/rh/trabajador']);
                     }
                 } else {
                     this.snackBar.open(`Error: ${res.mensaje || 'Error desconocido'}`, 'Cerrar', { duration: 5000 });
@@ -461,6 +461,6 @@ export class TrabajadorCreatePageComponent implements OnInit {
     }
 
     cancel() {
-        this.router.navigate(['/app/rh/trabajadores']);
+        this.router.navigate(['/app/rh/trabajador']);
     }
 }

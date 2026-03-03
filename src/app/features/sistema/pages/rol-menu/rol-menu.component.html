@@ -1,0 +1,103 @@
+<app-form-layout title="Asignación de Menús por Rol" moduleName="Sistema"
+    subtitle="Configura a qué pantallas tiene acceso cada perfil del sistema" [loading]="isSaving()"
+    [isValid]="!!idRolSeleccionado()" (onSave)="guardarCambios()">
+
+    <ng-template #formContent>
+
+        @if (isLoading() && !idRolSeleccionado()) {
+        <div class="flex justify-center items-center p-16">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        } @else {
+
+        <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
+            <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
+                <mat-icon class="text-blue-500 scale-90">manage_accounts</mat-icon>
+                Selecciona un Rol
+            </h3>
+            <div class="flex flex-col md:flex-row gap-4 items-start">
+                <mat-form-field appearance="outline" class="w-full md:w-1/2">
+                    <mat-label>Rol</mat-label>
+                    <mat-select [value]="idRolSeleccionado()" (selectionChange)="onRolChange($event.value)">
+                        @for (rol of roles(); track rol.idRol) {
+                        <mat-option [value]="rol.idRol">{{ rol.rol }}</mat-option>
+                        } @empty {
+                        <mat-option disabled>Sin roles disponibles</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                @if (idRolSeleccionado() && !isLoading()) {
+                <mat-form-field appearance="outline" class="w-full md:w-1/2">
+                    <mat-label>Buscar menú o pantalla</mat-label>
+                    <input matInput [value]="filtro()" (input)="filtro.set($any($event.target).value)"
+                        placeholder="Ej: Usuarios, Reportes...">
+                    <mat-icon matSuffix class="text-gray-400">search</mat-icon>
+                </mat-form-field>
+                }
+            </div>
+        </div>
+
+        @if (idRolSeleccionado()) {
+        @if (isLoading()) {
+        <div class="flex justify-center items-center p-10">
+            <mat-spinner diameter="30"></mat-spinner>
+        </div>
+        } @else {
+
+        <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
+            <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
+                <mat-icon class="text-purple-500 scale-90">security</mat-icon>
+                Permisos de Acceso al Menú
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                @for (padre of menusArbolFiltrado(); track padre.idMenu) {
+                <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-slate-900">
+
+                    <div class="pb-2 mb-2 border-b border-gray-200">
+                        <mat-checkbox color="primary" [checked]="estaSeleccionado(padre.idMenu)"
+                            (change)="toggleTodosHijos(padre, $event.checked)">
+                            <span class="flex items-center gap-2 font-semibold text-gray-800 dark:text-gray-100">
+                                <mat-icon class="text-gray-400 text-sm scale-90">{{ padre.icono || 'folder'
+                                    }}</mat-icon>
+                                {{ padre.menu }}
+                            </span>
+                        </mat-checkbox>
+                    </div>
+
+                    <div class="pl-6 flex flex-col gap-1.5">
+                        @for (hijo of padre.hijos; track hijo.idMenu) {
+                        <mat-checkbox color="primary" [checked]="estaSeleccionado(hijo.idMenu)"
+                            (change)="toggleMenu(hijo.idMenu, $event)">
+                            <span class="text-sm text-gray-600 dark:text-gray-400">{{ hijo.menu }}</span>
+                        </mat-checkbox>
+                        } @empty {
+                        <span class="text-xs text-gray-400 italic">Sin submenús</span>
+                        }
+                    </div>
+
+                </div>
+                } @empty {
+                <div class="col-span-full text-center py-8 text-gray-400">
+                    <mat-icon class="scale-150 mb-2">menu_open</mat-icon>
+                    <p>No hay menús registrados en el sistema.</p>
+                </div>
+                }
+            </div>
+        </div>
+
+        }
+        } @else {
+        <div
+            class="flex flex-col items-center justify-center py-16 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 dark:bg-slate-900">
+            <mat-icon class="scale-[2] text-gray-300 mb-4">touch_app</mat-icon>
+            <p class="text-gray-500">Selecciona un rol arriba para ver y modificar sus accesos al menú.</p>
+        </div>
+        }
+        }
+    </ng-template>
+
+    <ng-container *ngTemplateOutlet="formContent"></ng-container>
+
+</app-form-layout>

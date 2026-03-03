@@ -60,8 +60,19 @@ export class LoginPageComponent {
 
     this.authService.login(credentials).subscribe({
       next: () => {
-        this.isLoading.set(false);
-        this.router.navigate(['/app/home']);
+        this.authService.obtenerMenuYPermisos().subscribe({
+          next: (data: any) => {
+            this.authService.establecerMenusYPermisos(data);
+            this.isLoading.set(false);
+            this.router.navigate(['/app/home']);
+          },
+          error: () => {
+            this.isLoading.set(false);
+            this.errorMessage.set('Error al cargar los permisos del sistema');
+            this.authService.logout();
+          }
+        });
+
       },
       error: (err) => {
         this.isLoading.set(false);
