@@ -100,3 +100,27 @@
         border-radius: 20px;
     }
 }
+
+::ng-deep .mat-expansion-panel {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 8px !important;
+
+    .mat-expansion-panel-header {
+        padding: 0 !important;
+        border-radius: 8px !important;
+        font-family: inherit;
+
+        &:hover {
+            background-color: transparent !important;
+        }
+
+        .mat-expansion-panel-header-title {
+            color: inherit;
+        }
+    }
+
+    .mat-expansion-panel-body {
+        padding: 0 !important;
+    }
+}

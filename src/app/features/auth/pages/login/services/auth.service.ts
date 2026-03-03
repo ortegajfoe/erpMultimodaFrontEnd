@@ -1,25 +1,12 @@
-import { Injectable, signal, computed, inject, effect } from '@angular/core';
+import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, throwError, of, map } from 'rxjs';
+import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../../../environments/environment';
+import { User, AuthResponse } from '@core/models/auth.model';
 
-export interface User {
-    idUsuario: number;
-    usuario: string;
-    idEmpresa?: number;
-    role?: number;
-    [key: string]: any;
-}
+export type { User, AuthResponse };
 
-export interface AuthResponse {
-    exito: number;
-    data: {
-        token: string;
-        refreshToken?: string;
-        [key: string]: any;
-    };
-}
 
 @Injectable({
     providedIn: 'root'
@@ -34,7 +21,8 @@ export class AuthService {
 
     public isLoggedIn = computed(() => !!this._accessToken());
     public currentUser = this._currentUser.asReadonly();
-
+    public permisos = signal<string[]>([]);
+    public menu = signal<any[]>([]);
     constructor() {
         const savedUser = localStorage.getItem('user_data');
         if (savedUser) {
@@ -84,9 +72,12 @@ export class AuthService {
     logout() {
         this._accessToken.set(null);
         this._currentUser.set(null);
+        this.permisos.set([]);
+        this.menu.set([]);
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
         localStorage.removeItem('user_data');
+
         this.router.navigate(['/login']);
     }
 
@@ -97,11 +88,21 @@ export class AuthService {
         if (data.refreshToken) {
             localStorage.setItem('refresh_token', data.refreshToken);
         }
-
         const { token, refreshToken, ...user } = data;
-
         this._currentUser.set(user);
-
         localStorage.setItem('user_data', JSON.stringify(user));
+    }
+
+    obtenerMenuYPermisos() {
+        return this.http.get<any>(this.apiUrl + '/auth/menu-y-permisos');
+    }
+
+    establecerMenusYPermisos(data: { permisos: string[], menu: any[] }) {
+        this.permisos.set(data.permisos);
+        this.menu.set(data.menu);
+    }
+
+    tienePermiso(codigo: string): boolean {
+        return this.permisos().includes(codigo);
     }
 }

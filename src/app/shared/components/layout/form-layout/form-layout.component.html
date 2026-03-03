@@ -15,13 +15,15 @@
                 Cancelar
             </button>
 
-            <button mat-flat-button color="primary" [disabled]="!isValid || loading" (click)="onSave.emit()"
-                class="h-9 px-6 shadow-none">
-                <div class="flex items-center">
-                    <mat-spinner *ngIf="loading" diameter="16" class="mr-2 stroke-white"></mat-spinner>
-                    <span>{{ loading ? 'Guardando...' : 'Guardar' }}</span>
-                </div>
-            </button>
+            <span [matTooltip]="saveTooltip" [matTooltipDisabled]="isValid" style="display:inline-flex">
+                <button mat-flat-button color="primary" [disabled]="!isValid || loading" (click)="onSave.emit()"
+                    class="h-9 px-6 shadow-none" [style.pointer-events]="(!isValid || loading) ? 'none' : 'auto'">
+                    <div class="flex items-center">
+                        <mat-spinner *ngIf="loading" diameter="16" class="mr-2 stroke-white"></mat-spinner>
+                        <span>{{ loading ? 'Guardando...' : 'Guardar' }}</span>
+                    </div>
+                </button>
+            </span>
         </div>
     </header>
 

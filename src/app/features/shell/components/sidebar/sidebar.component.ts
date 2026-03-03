@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,6 +6,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { AuthService } from '@features/auth/pages/login/services/auth.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -21,4 +22,6 @@ export class SidebarComponent {
   @Output() toggle = new EventEmitter<void>();
   @Output() requestExpandGroup = new EventEmitter<string>();
   @Output() groupStateChange = new EventEmitter<{ groupId: string, expanded: boolean }>();
+  private authService = inject(AuthService);
+  menuItems = this.authService.menu;
 }

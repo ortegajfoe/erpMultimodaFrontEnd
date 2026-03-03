@@ -115,11 +115,11 @@ export class TrabajadoresListPageComponent implements OnInit {
     }
 
     onCreate() {
-        this.router.navigate(['/app/rh/trabajadores/nuevo']);
+        this.router.navigate(['/app/rh/trabajador/nuevo']);
     }
 
     onEdit(trabajador: Trabajador) {
-        this.router.navigate(['/app/rh/trabajadores', trabajador.idTrabajador, 'editar']);
+        this.router.navigate(['/app/rh/trabajador', trabajador.idTrabajador, 'editar']);
     }
 
     confirmDelete(templateRef: TemplateRef<any>, trabajador: Trabajador) {

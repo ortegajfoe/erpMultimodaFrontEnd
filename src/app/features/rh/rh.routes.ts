@@ -5,15 +5,15 @@ export const rhRoutes: Routes = [
         path: 'rh',
         children: [
             {
-                path: 'trabajadores',
+                path: 'trabajador',
                 loadComponent: () => import('./pages/trabajador/list/trabajadores-list.page.component').then(m => m.TrabajadoresListPageComponent)
             },
             {
-                path: 'trabajadores/nuevo',
+                path: 'trabajador/nuevo',
                 loadComponent: () => import('./pages/trabajador/form/trabajador.page.component').then(m => m.TrabajadorCreatePageComponent)
             },
             {
-                path: 'trabajadores/:id/editar',
+                path: 'trabajador/:id/editar',
                 loadComponent: () => import('./pages/trabajador/form/trabajador.page.component').then(m => m.TrabajadorCreatePageComponent)
             },
             {

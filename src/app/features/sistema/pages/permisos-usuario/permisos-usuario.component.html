@@ -1,0 +1,124 @@
+<app-form-layout title="Permisos Especiales por Usuario" moduleName="Sistema"
+    subtitle="Asigna botones y acciones específicas de forma individual a los usuarios" [loading]="isSaving()"
+    [isValid]="puedeGuardar" [saveTooltip]="puedeGuardar ? '' : 'No cuentas con permisos para guardar'"
+    (onSave)="guardarCambios()">
+
+    <ng-template #formContent>
+
+        @if (isLoading() && !idUsuarioSeleccionado()) {
+        <div class="flex justify-center items-center p-16">
+            <mat-spinner diameter="40"></mat-spinner>
+        </div>
+        } @else {
+
+        <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100 mb-6">
+            <h3 class="text-base font-semibold text-gray-800 mb-3 border-b pb-2 flex items-center gap-2">
+                <mat-icon class="text-blue-500 scale-90">person_search</mat-icon>
+                Selecciona un Usuario
+            </h3>
+            <div class="flex flex-col md:flex-row gap-4 items-start">
+                <mat-form-field appearance="outline" class="w-full md:w-1/2">
+                    <mat-label>Usuario</mat-label>
+                    <mat-select [value]="idUsuarioSeleccionado()" (selectionChange)="onUsuarioChange($event.value)">
+                        @for (user of usuarios(); track user.idUsuario) {
+                        <mat-option [value]="user.idUsuario">{{ user.usuario }}</mat-option>
+                        } @empty {
+                        <mat-option disabled>Sin usuarios disponibles</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+
+                @if (idUsuarioSeleccionado() && !isLoading()) {
+                <mat-form-field appearance="outline" class="w-full md:w-1/2">
+                    <mat-label>Buscar permiso o pantalla</mat-label>
+                    <input matInput [value]="filtro()" (input)="filtro.set($any($event.target).value)"
+                        placeholder="Ej: Exportar, Reportes...">
+                    <mat-icon matSuffix class="text-gray-400">search</mat-icon>
+                </mat-form-field>
+                }
+            </div>
+        </div>
+
+        @if (idUsuarioSeleccionado()) {
+        @if (isLoading()) {
+        <div class="flex justify-center items-center p-10">
+            <mat-spinner diameter="30"></mat-spinner>
+        </div>
+        } @else {
+
+        <div class="app-card p-4 rounded-lg bg-white shadow-sm border border-gray-100">
+            <h3 class="text-base font-semibold text-gray-800 mb-4 border-b pb-2 flex items-center gap-2">
+                <mat-icon class="text-green-500 scale-90">verified_user</mat-icon>
+                Acciones y Botones Permitidos
+            </h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                @for (padre of arbolPermisosFiltrado(); track padre.idMenu) {
+
+                <div
+                    class="border border-gray-100 hover:border-blue-100 transition-colors rounded-lg overflow-hidden bg-white shadow-sm flex flex-col">
+
+                    <div class="bg-gray-50 dark:bg-slate-800 p-3 border-b border-gray-100 flex items-center gap-2">
+                        <mat-icon class="text-gray-500 scale-90">{{ padre.icono || 'folder' }}</mat-icon>
+                        <span class="font-semibold text-gray-800 dark:text-gray-100">{{ padre.menu }}</span>
+                    </div>
+
+                    <div class="p-4 flex flex-col gap-5 flex-grow">
+                        @for (hijo of padre.hijos; track hijo.idMenu) {
+
+                        <div>
+                            <h4 class="text-xs font-bold text-gray-400 uppercase flex items-center gap-1 mb-2">
+                                <mat-icon class="scale-75">chevron_right</mat-icon>
+                                {{ hijo.menu }}
+                            </h4>
+
+                            <div class="grid grid-cols-1 gap-2 pl-6">
+                                @for (permiso of hijo.permisos; track permiso.idPermiso) {
+                                <mat-checkbox color="primary" [checked]="estaSeleccionado(permiso.idPermiso)"
+                                    (change)="togglePermiso(permiso.idPermiso, $event)">
+                                    <div class="flex flex-col">
+                                        <span
+                                            class="text-sm font-medium text-gray-700 dark:text-gray-200 leading-tight">
+                                            {{ permiso.nombre }}
+                                        </span>
+                                        <span class="text-[10px] text-gray-400 leading-tight mt-0.5">
+                                            {{ permiso.notas }}
+                                        </span>
+                                    </div>
+                                </mat-checkbox>
+                                }
+                            </div>
+                        </div>
+
+                        }
+                    </div>
+
+                </div>
+
+                } @empty {
+                <div
+                    class="col-span-full flex flex-col items-center justify-center py-10 text-gray-400 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+                    <mat-icon class="scale-150 mb-3">lock_open</mat-icon>
+                    <p>No hay permisos especiales asociados a las pantallas en el sistema.</p>
+                </div>
+                }
+
+            </div>
+        </div>
+
+        }
+        } @else {
+        <div
+            class="flex flex-col items-center justify-center py-16 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50 dark:bg-slate-900 mt-6">
+            <mat-icon class="scale-[2] text-gray-300 mb-4">person_search</mat-icon>
+            <p class="text-gray-500">Selecciona un usuario arriba para configurar sus acciones permitidas.</p>
+        </div>
+        }
+
+        }
+    </ng-template>
+
+    <ng-container *ngTemplateOutlet="formContent"></ng-container>
+
+</app-form-layout>
